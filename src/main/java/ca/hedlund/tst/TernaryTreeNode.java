@@ -26,33 +26,28 @@ public class TernaryTreeNode<V> {
 	 * Node value, a node is 'terminated' if it's
 	 * value is non-<code>null</code>.
 	 */
-	private final AtomicReference<V> valueRef = 
-			new AtomicReference<V>();
+	private V value;
 	
 	/**
 	 * parent reference
 	 */
-	private final AtomicReference<TernaryTreeNode<V>> parentRef = 
-			new AtomicReference<TernaryTreeNode<V>>();
+	private TernaryTreeNode<V> parent;
 	
 	/**
 	 * Atomic reference to left child
 	 */
-	private final AtomicReference<TernaryTreeNode<V>> leftRef = 
-			new AtomicReference<TernaryTreeNode<V>>();
+	private TernaryTreeNode<V> left;
 
 	/**
 	 * Atomic reference to right child
 	 */
-	private final AtomicReference<TernaryTreeNode<V>> rightRef =
-			new AtomicReference<TernaryTreeNode<V>>();
+	private TernaryTreeNode<V> right;
 	
 	
 	/**
 	 * Atomic reference to center child
 	 */
-	private final AtomicReference<TernaryTreeNode<V>> centerRef = 
-			new AtomicReference<TernaryTreeNode<V>>();
+	private TernaryTreeNode<V> center;
 	
 	/**
 	 * Constructor
@@ -69,11 +64,11 @@ public class TernaryTreeNode<V> {
 	}
 	
 	public TernaryTreeNode<V> getParent() {
-		return parentRef.get();
+		return parent;
 	}
 	
 	public void setParent(TernaryTreeNode<V> parent) {
-		this.parentRef.getAndSet(parent);
+		this.parent = parent;
 	}
 	
 	public char getChar() {
@@ -100,44 +95,46 @@ public class TernaryTreeNode<V> {
 	 * Get the node's value
 	 */
 	public V getValue() {
-		return valueRef.get();
+		return value;
 	}
 	
 	/**
 	 * Set the node's value
 	 */
 	public V setValue(V value) {
-		return valueRef.getAndSet(value);
+		final V oldVal = this.value;
+		this.value = value;
+		return oldVal;
 	}
 
 	/**
 	 * Get left child
 	 */
 	public TernaryTreeNode<V> getLeft() {
-		return leftRef.get();
+		return left;
 	}
 	
 	/**
 	 * Set left child
 	 */
 	public void setLeft(TernaryTreeNode<V> left) {
-		this.leftRef.getAndSet(left);
+		this.left = left;
 	}
 	
 	public TernaryTreeNode<V> getRight() {
-		return rightRef.get();
+		return right;
 	}
 
 	public void setRight(TernaryTreeNode<V> right) {
-		this.rightRef.getAndSet(right);
+		this.right = right;
 	}
 	
 	public TernaryTreeNode<V> getCenter() {
-		return centerRef.get();
+		return center;
 	}
 
 	public void setCenter(TernaryTreeNode<V> center) {
-		this.centerRef.getAndSet(center);
+		this.center = center;
 	}
 	
 	public TernaryTreeNode<V> getChild(Position pos) {

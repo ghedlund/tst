@@ -1,32 +1,33 @@
 package ca.hedlund.tst;
 
-
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.jar.JarEntry;
-
-import javax.jws.Oneway;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import ca.hedlund.tst.TernaryTreeNode.Position;
 
-
-
 /**
- * Ternary search tree implementation.
- *
+ * <p>Ternary search tree implementation.  This implementation is thread safe, however
+ * the default {@link Map} methods are not synchronized.  To obtain a synchronized
+ * version of this {@link Map}, use {@link Collections#synchronizedMap(Map)}.</p>
  */
 public class TernaryTree<V> implements Map<String, V> {
 	
 	/**
 	 * Root
 	 */
-	private final  AtomicReference<TernaryTreeNode<V>> rootRef =
-			new AtomicReference<TernaryTreeNode<V>>();
+	private TernaryTreeNode<V> root = null;
+	
+	/**
+	 * re-entrant lock
+	 */
+	private final Lock lock = new ReentrantLock();
 	
 	/**
 	 * Collator
@@ -38,11 +39,12 @@ public class TernaryTree<V> implements Map<String, V> {
 	}
 	
 	public TernaryTree(Comparator<Character> comparator) {
+		super();
 		this.comparator = comparator;
 	}
 	
 	public TernaryTreeNode<V> getRoot() {
-		return rootRef.get();
+		return root;
 	}
 	
 	@Override
@@ -93,51 +95,60 @@ public class TernaryTree<V> implements Map<String, V> {
 
 	@Override
 	public void clear() {
-		rootRef.getAndSet(null);
+		root = null;
 	}
 
 	@Override
 	public Set<String> keySet() {
 		final KeyVisitor visitor = new KeyVisitor();
+		lock.lock();
 		final TernaryTreeNode<V> root = getRoot();
 		if(root != null)
 			root.acceptVisitLast(visitor);
+		lock.unlock();
 		return visitor.keySet;
 	}
 
 	@Override
 	public Collection<V> values() {
 		final ValuesVisitor visitor = new ValuesVisitor();
+		lock.lock();
 		final TernaryTreeNode<V> root = getRoot();
 		if(root != null)
 			root.acceptVisitLast(visitor);
+		lock.unlock();
 		return visitor.values;
 	}
 
 	@Override
 	public Set<java.util.Map.Entry<String, V>> entrySet() {
 		final EntryVisitor visitor = new EntryVisitor();
+		lock.lock();
 		final TernaryTreeNode<V> root = getRoot();
 		if(root != null)
 			root.acceptVisitLast(visitor);
+		lock.unlock();
 		return visitor.values;
 	}
 	
 	public Set<String> keysWithPrefix(String prefix) {
 		final KeyVisitor visitor = new KeyVisitor();
 		final TernaryTreeNode<V> node = findNode(prefix, false);
+		lock.lock();
 		if(node != null ) {
 			if(node.isTerminated())
 				visitor.keySet.add(node.getPrefix());
 			if(node.getCenter() != null)
 				node.getCenter().acceptVisitLast(visitor);
 		}
+		lock.unlock();
 		return visitor.keySet;
 	}
 	
 	public Collection<V> valuesWithPrefix(String prefix) {
 		final ValuesVisitor visitor = new ValuesVisitor();
 		final TernaryTreeNode<V> node = findNode(prefix, false);
+		lock.lock();
 		if(node != null) {
 			if(node.isTerminated()) {
 				visitor.values.add(node.getValue());
@@ -146,12 +157,14 @@ public class TernaryTree<V> implements Map<String, V> {
 				node.getCenter().acceptVisitLast(visitor);
 			}
 		}
+		lock.unlock();
 		return visitor.values;
 	}
 	
 	public Set<java.util.Map.Entry<String, V>> entriesWithPrefix(String prefix) {
 		final EntryVisitor visitor = new EntryVisitor();
 		final TernaryTreeNode<V> node = findNode(prefix, false);
+		lock.lock();
 		if(node != null) {
 			if(node.isTerminated()) {
 				visitor.values.add(new Entry(node.getPrefix(), node.getValue()));
@@ -160,54 +173,67 @@ public class TernaryTree<V> implements Map<String, V> {
 				node.getCenter().acceptVisitLast(visitor);
 			}
 		}
+		lock.unlock();
 		return visitor.values;
 	}
 	
 	public Set<String> keysContaining(String infix) {
 		final KeyContainsVisitor visitor = new KeyContainsVisitor(infix);
+		lock.lock();
 		if(getRoot() != null) {
 			getRoot().acceptVisitFirst(visitor);
 		}
+		lock.unlock();
 		return visitor.getResult();
 	}
 	
 	public Collection<V> valuesForKeysContaining(String infix) {
 		final ValuesForKeyContainsVisitor visitor = new ValuesForKeyContainsVisitor(infix);
+		lock.lock();
 		if(getRoot() != null) {
 			getRoot().acceptVisitFirst(visitor);
 		}
+		lock.unlock();
 		return visitor.getResult();
 	}
 	
 	public Set<java.util.Map.Entry<String, V>> entriesForKeysContaining(String infix) {
 		final EntriesForKeyContainsVisitor visitor = new EntriesForKeyContainsVisitor(infix);
+		lock.lock();
 		if(getRoot() != null) {
 			getRoot().acceptVisitFirst(visitor);
 		}
+		lock.unlock();
 		return visitor.getResult();
 	}
 	
 	public Set<String> keysEndingWith(String suffix) {
 		final KeyEndsWithVisitor visitor = new KeyEndsWithVisitor(suffix);
+		lock.lock();
 		if(getRoot() != null) {
 			getRoot().acceptVisitLast(visitor);
 		}
+		lock.unlock();
 		return visitor.getResult();
 	}
 	
 	public Collection<V> valuesForKeysEndingWith(String suffix) {
 		final ValuesForKeyEndsWithVisitor visitor = new ValuesForKeyEndsWithVisitor(suffix);
+		lock.lock();
 		if(getRoot() != null) {
 			getRoot().acceptVisitLast(visitor);
 		}
+		lock.unlock();
 		return visitor.getResult();
 	}
 	
 	public Set<Map.Entry<String, V>> entriesForKeysEndingWith(String suffix) {
 		final EntriesForKeyEndsWithVisitor visitor = new EntriesForKeyEndsWithVisitor(suffix);
+		lock.lock();
 		if(getRoot() != null) {
 			getRoot().acceptVisitLast(visitor);
 		}
+		lock.unlock();
 		return visitor.getResult();
 	}
 	
@@ -221,6 +247,10 @@ public class TernaryTree<V> implements Map<String, V> {
 	 */
 	private TernaryTreeNode<V> findNode(String key, boolean create) {
 		if(key.length() == 0) return null;
+		TernaryTreeNode<V> retVal = null;
+		
+		lock.lock();
+		
 		TernaryTreeNode<V> prevNode = null;
 		TernaryTreeNode<V> currentNode = getRoot();
 		int charIndex = 0;
@@ -231,12 +261,12 @@ public class TernaryTree<V> implements Map<String, V> {
 				if(create) {
 					final TernaryTreeNode<V> newNode = new TernaryTreeNode<V>(prevNode, keyChar);
 					if(prevNode == null)
-						rootRef.getAndSet(newNode);
+						root = newNode;
 					else
 						prevNode.setChild(newNode, lastPos);
 					currentNode = newNode;
 				} else {
-					return null;					
+					break;			
 				}
 			}
 			prevNode = currentNode;
@@ -248,7 +278,10 @@ public class TernaryTree<V> implements Map<String, V> {
 			
 			if(cmp == 0) {
 				charIndex++;
-				if(charIndex == key.length()) return currentNode;
+				if(charIndex == key.length()) {
+					retVal = currentNode;
+					break;
+				}
 				currentNode = currentNode.getCenter();
 				lastPos = Position.EQUAL;
 			} else if(cmp < 0) {
@@ -259,6 +292,10 @@ public class TernaryTree<V> implements Map<String, V> {
 				lastPos = Position.HIGH;
 			}
 		}
+		
+		lock.unlock();
+		
+		return retVal;
 	}
 	
 	/* Internal Visitors */
@@ -488,12 +525,11 @@ public class TernaryTree<V> implements Map<String, V> {
 		
 		private final String key;
 		
-		private final AtomicReference<V> valueRef = 
-				new AtomicReference<V>();
+		private V value;
 
 		public Entry(String key, V value) {
 			this.key = key;
-			this.valueRef.getAndSet(value);
+			this.value = value;
 		}
 		
 		@Override
@@ -503,12 +539,14 @@ public class TernaryTree<V> implements Map<String, V> {
 
 		@Override
 		public V getValue() {
-			return valueRef.get();
+			return value;
 		}
 
 		@Override
 		public V setValue(V object) {
-			return valueRef.getAndSet(object);
+			final V oldVal = this.value;
+			this.value = object;
+			return oldVal;
 		}
 		
 	}
