@@ -104,7 +104,7 @@ public class TernaryTree<V> implements Map<String, V> {
 		lock.lock();
 		final TernaryTreeNode<V> root = getRoot();
 		if(root != null)
-			root.acceptVisitLast(visitor);
+			root.acceptVisitMiddle(visitor);
 		lock.unlock();
 		return visitor.keySet;
 	}
@@ -115,7 +115,7 @@ public class TernaryTree<V> implements Map<String, V> {
 		lock.lock();
 		final TernaryTreeNode<V> root = getRoot();
 		if(root != null)
-			root.acceptVisitLast(visitor);
+			root.acceptVisitMiddle(visitor);
 		lock.unlock();
 		return visitor.values;
 	}
@@ -126,7 +126,7 @@ public class TernaryTree<V> implements Map<String, V> {
 		lock.lock();
 		final TernaryTreeNode<V> root = getRoot();
 		if(root != null)
-			root.acceptVisitLast(visitor);
+			root.acceptVisitMiddle(visitor);
 		lock.unlock();
 		return visitor.values;
 	}
@@ -139,7 +139,7 @@ public class TernaryTree<V> implements Map<String, V> {
 			if(node.isTerminated())
 				visitor.keySet.add(node.getPrefix());
 			if(node.getCenter() != null)
-				node.getCenter().acceptVisitLast(visitor);
+				node.getCenter().acceptVisitMiddle(visitor);
 		}
 		lock.unlock();
 		return visitor.keySet;
@@ -154,7 +154,7 @@ public class TernaryTree<V> implements Map<String, V> {
 				visitor.values.add(node.getValue());
 			}
 			if(node.getCenter() != null) {
-				node.getCenter().acceptVisitLast(visitor);
+				node.getCenter().acceptVisitMiddle(visitor);
 			}
 		}
 		lock.unlock();
@@ -170,7 +170,7 @@ public class TernaryTree<V> implements Map<String, V> {
 				visitor.values.add(new Entry(node.getPrefix(), node.getValue()));
 			}
 			if(node.getCenter() != null) {
-				node.getCenter().acceptVisitLast(visitor);
+				node.getCenter().acceptVisitMiddle(visitor);
 			}
 		}
 		lock.unlock();
@@ -181,7 +181,7 @@ public class TernaryTree<V> implements Map<String, V> {
 		final KeyContainsVisitor visitor = new KeyContainsVisitor(infix);
 		lock.lock();
 		if(getRoot() != null) {
-			getRoot().acceptVisitFirst(visitor);
+			getRoot().acceptVisitMiddle(visitor);
 		}
 		lock.unlock();
 		return visitor.getResult();
@@ -191,7 +191,7 @@ public class TernaryTree<V> implements Map<String, V> {
 		final ValuesForKeyContainsVisitor visitor = new ValuesForKeyContainsVisitor(infix);
 		lock.lock();
 		if(getRoot() != null) {
-			getRoot().acceptVisitFirst(visitor);
+			getRoot().acceptVisitMiddle(visitor);
 		}
 		lock.unlock();
 		return visitor.getResult();
@@ -201,7 +201,7 @@ public class TernaryTree<V> implements Map<String, V> {
 		final EntriesForKeyContainsVisitor visitor = new EntriesForKeyContainsVisitor(infix);
 		lock.lock();
 		if(getRoot() != null) {
-			getRoot().acceptVisitFirst(visitor);
+			getRoot().acceptVisitMiddle(visitor);
 		}
 		lock.unlock();
 		return visitor.getResult();
@@ -211,7 +211,7 @@ public class TernaryTree<V> implements Map<String, V> {
 		final KeyEndsWithVisitor visitor = new KeyEndsWithVisitor(suffix);
 		lock.lock();
 		if(getRoot() != null) {
-			getRoot().acceptVisitLast(visitor);
+			getRoot().acceptVisitMiddle(visitor);
 		}
 		lock.unlock();
 		return visitor.getResult();
@@ -221,7 +221,7 @@ public class TernaryTree<V> implements Map<String, V> {
 		final ValuesForKeyEndsWithVisitor visitor = new ValuesForKeyEndsWithVisitor(suffix);
 		lock.lock();
 		if(getRoot() != null) {
-			getRoot().acceptVisitLast(visitor);
+			getRoot().acceptVisitMiddle(visitor);
 		}
 		lock.unlock();
 		return visitor.getResult();
@@ -231,7 +231,7 @@ public class TernaryTree<V> implements Map<String, V> {
 		final EntriesForKeyEndsWithVisitor visitor = new EntriesForKeyEndsWithVisitor(suffix);
 		lock.lock();
 		if(getRoot() != null) {
-			getRoot().acceptVisitLast(visitor);
+			getRoot().acceptVisitMiddle(visitor);
 		}
 		lock.unlock();
 		return visitor.getResult();

@@ -1,9 +1,6 @@
 package ca.hedlund.tst;
 
-import java.util.Map;
-
-import junit.framework.Assert;
-import junit.framework.JUnit4TestAdapter;
+import java.util.Map.Entry;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -14,7 +11,7 @@ public class TSTTest {
 
 	@Test
 	public void test() {
-		final TstDict tree = new TstDict();
+		final TernaryTree<String> tree = new TernaryTree<String>();
 		tree.put("hello", "world");
 		
 		tree.put("-ostpy", "bals");
@@ -25,8 +22,14 @@ public class TSTTest {
 		tree.put("back", "asdfsadsd");
 		tree.put("bacteria", "asdfsasdfadsd");
 		
+		for(Entry<String, String> entries:tree.entriesWithPrefix("je")) {
+			System.out.println(entries.getKey() + " = " + entries.getValue());
+		}
+		for(Entry<String, String> entries:tree.entriesForKeysEndingWith("py")) {
+			System.out.println(entries.getKey() + " = " + entries.getValue());
+		}
 		for(String key:tree.keySet()) {
-			System.out.println("key = " + tree.get(key));
+			System.out.println(key + "= " + tree.get(key));
 		}
 	}
 	

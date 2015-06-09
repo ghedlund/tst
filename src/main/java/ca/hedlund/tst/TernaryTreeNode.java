@@ -1,8 +1,6 @@
 package ca.hedlund.tst;
 
 
-import java.lang.ref.WeakReference;
-import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Node for ternary trees.
@@ -213,6 +211,16 @@ public class TernaryTreeNode<V> {
 			if(getRight() != null)
 				getRight().acceptVisitFirst(visitor);
 		}
+	}
+	
+	public void acceptVisitMiddle(TernaryTreeNodeVisitor<V> visitor) {
+		if(getLeft() != null)
+			getLeft().acceptVisitMiddle(visitor);
+		visitor.visit(this);
+		if(getCenter() != null)
+			getCenter().acceptVisitMiddle(visitor);
+		if(getRight() != null)
+			getRight().acceptVisitMiddle(visitor);
 	}
 	
 }
