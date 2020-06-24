@@ -88,7 +88,7 @@ public class TstDict implements Map<String, String> {
 		++numRefs;
 		valueTree.put(value, numRefs);
 		
-		final TernaryTreeNode<Integer> valueNode = valueTree.findNode(value, false);
+		final TernaryTreeNode<Integer> valueNode = valueTree.findNode(value, true, false);
 		keyTree.put(key, valueNode);
 		
 		return retVal;
@@ -112,7 +112,7 @@ public class TstDict implements Map<String, String> {
 			oldValueNode.setValue(oldValueNode.getValue()-1);
 		}
 		
-		final TernaryTreeNode<TernaryTreeNode<Integer>> keyNode = keyTree.findNode(key.toString(), false);
+		final TernaryTreeNode<TernaryTreeNode<Integer>> keyNode = keyTree.findNode(key.toString(), true, false);
 		keyNode.setValue(null);
 		
 		return retVal;
