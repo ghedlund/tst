@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.stream.Collectors;
 
 import ca.hedlund.tst.TernaryTreeNode.Position;
 
@@ -56,10 +57,14 @@ public class TernaryTree<V> implements Map<String, V> {
 	public boolean isEmpty() {
 		return values().isEmpty();
 	}
-
+	
 	@Override
 	public boolean containsKey(Object key) {
-		final TernaryTreeNode<V> node = findNode(key.toString(), true, false);
+		return containsKey(key, true);
+	}
+
+	public boolean containsKey(Object key, boolean caseSensitive) {
+		final TernaryTreeNode<V> node = findNode(key.toString(), caseSensitive, false);
 		return (node != null);
 	}
 
@@ -100,35 +105,46 @@ public class TernaryTree<V> implements Map<String, V> {
 
 	@Override
 	public Set<String> keySet() {
-		final KeyVisitor visitor = new KeyVisitor();
+		final AccumulatingNodeVisitor visitor = new AccumulatingNodeVisitor();
 		lock.lock();
 		final TernaryTreeNode<V> root = getRoot();
 		if(root != null)
 			root.acceptVisitMiddle(visitor);
 		lock.unlock();
-		return visitor.keySet;
+		
+		return visitor.nodeSet.stream()
+					.map( node -> node.getPrefix() )
+					.collect(Collectors.toSet());
 	}
 
 	@Override
 	public Collection<V> values() {
-		final ValuesVisitor visitor = new ValuesVisitor();
+		final AccumulatingNodeVisitor visitor = new AccumulatingNodeVisitor();
 		lock.lock();
 		final TernaryTreeNode<V> root = getRoot();
 		if(root != null)
 			root.acceptVisitMiddle(visitor);
 		lock.unlock();
-		return visitor.values;
+		
+		return visitor.nodeSet.stream()
+				.map( node -> node.getValue() )
+				.collect(Collectors.toSet());
 	}
 
 	@Override
 	public Set<java.util.Map.Entry<String, V>> entrySet() {
-		final EntryVisitor visitor = new EntryVisitor();
+		final AccumulatingNodeVisitor visitor = new AccumulatingNodeVisitor();
 		lock.lock();
 		final TernaryTreeNode<V> root = getRoot();
 		if(root != null)
 			root.acceptVisitMiddle(visitor);
 		lock.unlock();
-		return visitor.values;
+		
+		return visitor.nodeSet.stream()
+				.map( node -> {
+					return new Entry(node.getPrefix(), node.getValue());
+				})
+				.collect(Collectors.toSet());
 	}
 	
 	public Set<String> keysWithPrefix(String prefix) {
@@ -136,17 +152,20 @@ public class TernaryTree<V> implements Map<String, V> {
 	}
 	
 	public Set<String> keysWithPrefix(String prefix, boolean caseSensitive) {
-		final KeyVisitor visitor = new KeyVisitor();
+		final AccumulatingNodeVisitor visitor = new AccumulatingNodeVisitor();
 		final TernaryTreeNode<V> node = findNode(prefix, caseSensitive, false);
 		lock.lock();
 		if(node != null ) {
 			if(node.isTerminated())
-				visitor.keySet.add(node.getPrefix());
+				visitor.nodeSet.add(node);
 			if(node.getCenter() != null)
 				node.getCenter().acceptVisitMiddle(visitor);
 		}
 		lock.unlock();
-		return visitor.keySet;
+		
+		return visitor.nodeSet.stream()
+				.map( n -> n.getPrefix() )
+				.collect(Collectors.toSet());
 	}
 	
 	public Collection<V> valuesWithPrefix(String prefix) {
@@ -154,19 +173,22 @@ public class TernaryTree<V> implements Map<String, V> {
 	}
 	
 	public Collection<V> valuesWithPrefix(String prefix, boolean caseSensitive) {
-		final ValuesVisitor visitor = new ValuesVisitor();
+		final AccumulatingNodeVisitor visitor = new AccumulatingNodeVisitor();
 		final TernaryTreeNode<V> node = findNode(prefix, caseSensitive, false);
 		lock.lock();
 		if(node != null) {
 			if(node.isTerminated()) {
-				visitor.values.add(node.getValue());
+				visitor.nodeSet.add(node);
 			}
 			if(node.getCenter() != null) {
 				node.getCenter().acceptVisitMiddle(visitor);
 			}
 		}
 		lock.unlock();
-		return visitor.values;
+		
+		return visitor.nodeSet.stream()
+				.map( n -> n.getValue() )
+				.collect(Collectors.toSet());
 	}
 	
 	public Set<java.util.Map.Entry<String, V>> entriesWithPrefix(String prefix) {
@@ -174,19 +196,24 @@ public class TernaryTree<V> implements Map<String, V> {
 	}
 	
 	public Set<java.util.Map.Entry<String, V>> entriesWithPrefix(String prefix, boolean caseSensitive) {
-		final EntryVisitor visitor = new EntryVisitor();
+		final AccumulatingNodeVisitor visitor = new AccumulatingNodeVisitor();
 		final TernaryTreeNode<V> node = findNode(prefix, caseSensitive, false);
 		lock.lock();
 		if(node != null) {
 			if(node.isTerminated()) {
-				visitor.values.add(new Entry(node.getPrefix(), node.getValue()));
+				visitor.nodeSet.add(node);
 			}
 			if(node.getCenter() != null) {
 				node.getCenter().acceptVisitMiddle(visitor);
 			}
 		}
 		lock.unlock();
-		return visitor.values;
+		
+		return visitor.nodeSet.stream()
+				.map( n -> {
+					return new Entry(n.getPrefix(), n.getValue());
+				})
+				.collect(Collectors.toSet());
 	}
 	
 	public Set<String> keysContaining(String infix) {
@@ -194,13 +221,16 @@ public class TernaryTree<V> implements Map<String, V> {
 	}
 	
 	public Set<String> keysContaining(String infix, boolean caseSensitive) {
-		final KeyContainsVisitor visitor = new KeyContainsVisitor(infix, caseSensitive);
+		final NodeContainsVisitor visitor = new NodeContainsVisitor(infix, caseSensitive);
 		lock.lock();
 		if(getRoot() != null) {
 			getRoot().acceptVisitMiddle(visitor);
 		}
 		lock.unlock();
-		return visitor.getResult();
+		
+		return visitor.nodeSet.stream()
+				.map( n -> n.getPrefix() )
+				.collect(Collectors.toSet());
 	}
 	
 	public Collection<V> valuesForKeysContaining(String infix) {
@@ -208,13 +238,16 @@ public class TernaryTree<V> implements Map<String, V> {
 	}
 	
 	public Collection<V> valuesForKeysContaining(String infix, boolean caseSensitive) {
-		final ValuesForKeyContainsVisitor visitor = new ValuesForKeyContainsVisitor(infix, caseSensitive);
+		final NodeContainsVisitor visitor = new NodeContainsVisitor(infix, caseSensitive);
 		lock.lock();
 		if(getRoot() != null) {
 			getRoot().acceptVisitMiddle(visitor);
 		}
 		lock.unlock();
-		return visitor.getResult();
+		
+		return visitor.nodeSet.stream()
+				.map( n -> n.getValue() )
+				.collect(Collectors.toSet());
 	}
 	
 	public Set<java.util.Map.Entry<String, V>> entriesForKeysContaining(String infix) {
@@ -222,13 +255,18 @@ public class TernaryTree<V> implements Map<String, V> {
 	}
 	
 	public Set<java.util.Map.Entry<String, V>> entriesForKeysContaining(String infix, boolean caseSensitive) {
-		final EntriesForKeyContainsVisitor visitor = new EntriesForKeyContainsVisitor(infix, caseSensitive);
+		final NodeContainsVisitor visitor = new NodeContainsVisitor(infix, caseSensitive);
 		lock.lock();
 		if(getRoot() != null) {
 			getRoot().acceptVisitMiddle(visitor);
 		}
 		lock.unlock();
-		return visitor.getResult();
+		
+		return visitor.nodeSet.stream()
+				.map( n -> {
+					return new Entry(n.getPrefix(), n.getValue());
+				})
+				.collect(Collectors.toSet());
 	}
 	
 	public Set<String> keysEndingWith(String suffix) {
@@ -357,7 +395,8 @@ public class TernaryTree<V> implements Map<String, V> {
 			
 			if(matches) {
 				final String prefix = node.getPrefix();
-				if(prefix.endsWith(txt)) {
+				matches = (caseSensitive ? prefix.endsWith(txt) : prefix.toLowerCase().endsWith(txt.toLowerCase()));
+				if(matches) {
 					accept(node);
 					return true;
 				}
@@ -365,78 +404,77 @@ public class TernaryTree<V> implements Map<String, V> {
 			return false;
 		}
 		
-		
 		public abstract T getResult();
 	
 		public abstract void accept(TernaryTreeNode<V> node);
 		
 	}
 	
-	private class KeyContainsVisitor extends ContainsVisitor<Set<String>> {
+	private class NodeContainsVisitor extends ContainsVisitor<Set<TernaryTreeNode<V>>> {
 
-		final Set<String> keySet = new LinkedHashSet<String>();
+		final Set<TernaryTreeNode<V>> nodeSet = new LinkedHashSet<TernaryTreeNode<V>>();
 		
-		public KeyContainsVisitor(String txt, boolean caseSensitive) {
+		public NodeContainsVisitor(String txt, boolean caseSensitive) {
 			super(txt, caseSensitive);
 		}
 
 		@Override
-		public Set<String> getResult() {
-			return keySet;
+		public Set<TernaryTreeNode<V>> getResult() {
+			return nodeSet;
 		}
 
 		@Override
 		public void accept(TernaryTreeNode<V> node) {
-			final KeyVisitor visitor = new KeyVisitor();
-			node.acceptVisitLast(visitor);
-			keySet.addAll(visitor.keySet);
+			final AccumulatingNodeVisitor visitor = new AccumulatingNodeVisitor();
+			node.acceptVisitOnlyCenter(visitor);
+			nodeSet.addAll(visitor.nodeSet);
 		}
 		
 	}
 	
-	private class ValuesForKeyContainsVisitor extends ContainsVisitor<Collection<V>> {
-
-		public ValuesForKeyContainsVisitor(String txt, boolean caseSensitive) {
-			super(txt, caseSensitive);
-		}
-
-		private final Collection<V> values = new ArrayList<V>();
-		
-		@Override
-		public Collection<V> getResult() {
-			return values;
-		}
-
-		@Override
-		public void accept(TernaryTreeNode<V> node) {
-			final ValuesVisitor visitor = new ValuesVisitor();
-			node.acceptVisitLast(visitor);
-			values.addAll(visitor.values);
-		}
-		
-	}
-	
-	private class EntriesForKeyContainsVisitor extends ContainsVisitor<Set<Map.Entry<String, V>>> {
-		
-		private Set<Map.Entry<String, V>> entrySet = new LinkedHashSet<Map.Entry<String,V>>();
-		
-		public EntriesForKeyContainsVisitor(String txt, boolean caseSensitive) {
-			super(txt, caseSensitive);
-		}
-
-		@Override
-		public Set<java.util.Map.Entry<String, V>> getResult() {
-			return entrySet;
-		}
-
-		@Override
-		public void accept(TernaryTreeNode<V> node) {
-			final EntryVisitor visitor = new EntryVisitor();
-			node.acceptVisitLast(visitor);
-			entrySet.addAll(visitor.values);
-		}
-		
-	}
+//	private class ValuesForKeyContainsVisitor extends ContainsVisitor<Collection<V>> {
+//
+//		public ValuesForKeyContainsVisitor(String txt, boolean caseSensitive) {
+//			super(txt, caseSensitive);
+//		}
+//
+//		private final Collection<V> values = new ArrayList<V>();
+//		
+//		@Override
+//		public Collection<V> getResult() {
+//			return values;
+//		}
+//
+//		@Override
+//		public void accept(TernaryTreeNode<V> node) {
+//			final ValuesVisitor visitor = new ValuesVisitor();
+//			node.acceptVisitOnlyCenter(visitor);
+//			values.addAll(visitor.values);
+//		}
+//		
+//	}
+//	
+//	private class EntriesForKeyContainsVisitor extends ContainsVisitor<Set<Map.Entry<String, V>>> {
+//		
+//		private Set<Map.Entry<String, V>> entrySet = new LinkedHashSet<Map.Entry<String,V>>();
+//		
+//		public EntriesForKeyContainsVisitor(String txt, boolean caseSensitive) {
+//			super(txt, caseSensitive);
+//		}
+//
+//		@Override
+//		public Set<java.util.Map.Entry<String, V>> getResult() {
+//			return entrySet;
+//		}
+//
+//		@Override
+//		public void accept(TernaryTreeNode<V> node) {
+//			final EntryVisitor visitor = new EntryVisitor();
+//			node.acceptVisitOnlyCenter(visitor);
+//			entrySet.addAll(visitor.values);
+//		}
+//		
+//	}
 	
 	private abstract class EndsWithVisitor<T> implements TernaryTreeNodeVisitor<V> {
 		
@@ -462,7 +500,8 @@ public class TernaryTree<V> implements Map<String, V> {
 			
 			if(matches) {
 				final String prefix = node.getPrefix();
-				if(prefix.endsWith(txt) && node.isTerminated()) {
+				matches = (caseSensitive ? prefix.endsWith(txt) : prefix.toLowerCase().endsWith(txt.toLowerCase()));
+				if(matches && node.isTerminated()) {
 					accept(node);
 					return true;
 				}
@@ -532,42 +571,42 @@ public class TernaryTree<V> implements Map<String, V> {
 		
 	}
 	
-	private class KeyVisitor implements TernaryTreeNodeVisitor<V> {
-		final Set<String> keySet = new LinkedHashSet<String>();
+	private class AccumulatingNodeVisitor implements TernaryTreeNodeVisitor<V> {
+		final Set<TernaryTreeNode<V>> nodeSet = new LinkedHashSet<TernaryTreeNode<V>>();
 
 		@Override
 		public boolean visit(TernaryTreeNode<V> node) {
 			if(node.isTerminated()) {
-				keySet.add(node.getPrefix());
+				nodeSet.add(node);
 			}
 			return false;
 		}
 		
 	}
 	
-	private class ValuesVisitor implements TernaryTreeNodeVisitor<V> {
-		final Collection<V> values = new ArrayList<V>();
-
-		@Override
-		public boolean visit(TernaryTreeNode<V> node) {
-			if(node.isTerminated())
-				values.add(node.getValue());
-			return false;
-		}
-	}
-	
-	private class EntryVisitor implements TernaryTreeNodeVisitor<V> {
-		final Set<Map.Entry<String, V>> values = new LinkedHashSet<Map.Entry<String, V>>();
-
-		@Override
-		public boolean visit(TernaryTreeNode<V> node) {
-			if(node.isTerminated()) {
-				final Entry entry = new Entry(node.getPrefix(), node.getValue());
-				values.add(entry);
-			}
-			return false;
-		}
-	}
+//	private class ValuesVisitor implements TernaryTreeNodeVisitor<V> {
+//		final Collection<V> values = new ArrayList<V>();
+//
+//		@Override
+//		public boolean visit(TernaryTreeNode<V> node) {
+//			if(node.isTerminated())
+//				values.add(node.getValue());
+//			return false;
+//		}
+//	}
+//	
+//	private class EntryVisitor implements TernaryTreeNodeVisitor<V> {
+//		final Set<Map.Entry<String, V>> values = new LinkedHashSet<Map.Entry<String, V>>();
+//
+//		@Override
+//		public boolean visit(TernaryTreeNode<V> node) {
+//			if(node.isTerminated()) {
+//				final Entry entry = new Entry(node.getPrefix(), node.getValue());
+//				values.add(entry);
+//			}
+//			return false;
+//		}
+//	}
 	
 	private class Entry implements Map.Entry<String, V> {
 		

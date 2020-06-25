@@ -223,4 +223,10 @@ public class TernaryTreeNode<V> {
 			getRight().acceptVisitMiddle(visitor);
 	}
 	
+	public void acceptVisitOnlyCenter(TernaryTreeNodeVisitor<V> visitor) {
+		if(getCenter() != null)
+			getCenter().acceptVisitMiddle(visitor);
+		visitor.visit(this);
+	}
+	
 }
