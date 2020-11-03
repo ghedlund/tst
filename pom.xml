@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>ca.hedlund</groupId>
   <artifactId>tst</artifactId>
-  <version>0.5</version>
+  <version>0.6</version>
   <name>Ternary Search Tree</name>
   
   <organization>
@@ -79,10 +79,10 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.8.0</version>
         <configuration>
           <source>11</source>
           <target>11</target>
-          <sourceEncoding>UTF-8</sourceEncoding>
         </configuration>
       </plugin>
     </plugins>

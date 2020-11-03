@@ -13,18 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package ca.hedlund.tst;
-
-
-public interface TernaryTreeNodeVisitor<V> {
-
-	/**
-	 * Accept the given tree node
-	 * 
-	 * @param node
-	 * @return <code>true</code> if this visit
-	 *  should stop when using {@link TernaryTreeNode#acceptVisitFirst(TernaryTreeNodeVisitor)}
-	 */
-	public boolean visit(TernaryTreeNode<V> node);
-	
+module ca.hedlund.tst {
+	exports ca.hedlund.tst;
 }
