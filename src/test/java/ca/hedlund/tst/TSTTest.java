@@ -31,14 +31,6 @@ public class TSTTest {
 		final TernaryTree<String> tree = new TernaryTree<String>();
 		tree.put("hello", "world");
 		
-//		tree.put("-ostpy", "bals");
-//		tree.put("jelollo", "asdfsadsd");
-//		tree.put("jeflol","asdfsadsd");
-//		tree.put("tgest", "world");
-//		tree.put("asdfdsafs", "bals");
-//		tree.put("back", "asdfsadsd");
-//		tree.put("bacteria", "asdfsasdfadsd");
-		
 		tree.put("ABCD 1231 This is a test", "1");
 		tree.put("ABCD 1232 This is A test", "1");
 		tree.put("ABCD 123", "1");
@@ -46,23 +38,13 @@ public class TSTTest {
 		tree.put("ABCD 1234 This is C test", "1");
 		tree.put("ABCD 1235 This is D test", "1");
 		
-//		for(Entry<String, String> entries:tree.entriesWithPrefix("jE", false)) {
-//			System.out.println(entries.getKey() + " = " + entries.getValue());
-//		}
 		for(Entry<String, String> entries:tree.entriesForKeysContaining("ABCD 123", false)) {
 			System.out.println(entries.getKey() + " = " + entries.getValue());
 		}
-		
-//		for(Entry<String, String> entries:tree.entriesForKeysEndingWith("py")) {
-//			System.out.println(entries.getKey() + " = " + entries.getValue());
-//		}
-//		for(String key:tree.keySet()) {
-//			System.out.println(key + "= " + tree.get(key));
-//		}
 	}
 	
 	public void addCompletion(String path, TernaryTree<String> test) {
-		if(!test.containsKey(path))
+		if(!test.containsKey(path) && path.lastIndexOf('.') > 0)
 			test.put(path.substring(0, path.lastIndexOf('.')), "");
 	}
 	
@@ -88,13 +70,6 @@ public class TSTTest {
 		for(Entry<String, String> entries:tree.entriesForKeysContaining("The Golden Girls S01E07", false)) {
 			System.out.println(entries.getKey() + " = " + entries.getValue());
 		}
-		
-//		for(Entry<String, String> entries:tree.entriesForKeysEndingWith("py")) {
-//			System.out.println(entries.getKey() + " = " + entries.getValue());
-//		}
-//		for(String key:tree.keySet()) {
-//			System.out.println(key + "= " + tree.get(key));
-//		}
 	}
 	
 }
