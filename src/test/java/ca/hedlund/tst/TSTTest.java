@@ -38,7 +38,7 @@ public class TSTTest {
 		tree.put("us", "1");
 		tree.put("i", "1");
 		
-		for(Entry<String, String> entries:tree.entriesForKeysContaining("ABCD 1234", false)) {
+		for(Entry<String, String> entries:tree.entriesForKeysContaining("cu", false)) {
 			System.out.println(entries.getKey() + " = " + entries.getValue());
 		}
 		System.out.println(tree.keySet());
