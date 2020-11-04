@@ -127,9 +127,11 @@ public class TernaryTree<V> implements Map<String, V> {
 			root.acceptVisitMiddle(visitor);
 		lock.unlock();
 		
-		return visitor.nodeSet.stream()
+		LinkedHashSet<String> retVal = new LinkedHashSet<>();
+		visitor.nodeSet.stream()
 					.map( node -> node.getPrefix() )
-					.collect(Collectors.toSet());
+					.forEach(retVal::add);
+		return retVal;
 	}
 
 	@Override
@@ -141,9 +143,11 @@ public class TernaryTree<V> implements Map<String, V> {
 			root.acceptVisitMiddle(visitor);
 		lock.unlock();
 		
-		return visitor.nodeSet.stream()
+		ArrayList<V> values = new ArrayList<>();
+		visitor.nodeSet.stream()
 				.map( node -> node.getValue() )
-				.collect(Collectors.toSet());
+				.forEach(values::add);
+		return values;
 	}
 
 	@Override
@@ -155,11 +159,13 @@ public class TernaryTree<V> implements Map<String, V> {
 			root.acceptVisitMiddle(visitor);
 		lock.unlock();
 		
-		return visitor.nodeSet.stream()
+		LinkedHashSet<java.util.Map.Entry<String, V>> retVal = new LinkedHashSet<>();
+		visitor.nodeSet.stream()
 				.map( node -> {
 					return new Entry(node.getPrefix(), node.getValue());
 				})
-				.collect(Collectors.toSet());
+				.forEach(retVal::add);
+		return retVal;
 	}
 	
 	public Set<String> keysWithPrefix(String prefix) {
@@ -178,9 +184,11 @@ public class TernaryTree<V> implements Map<String, V> {
 		}
 		lock.unlock();
 		
-		return visitor.nodeSet.stream()
+		LinkedHashSet<String> retVal = new LinkedHashSet<>();
+		visitor.nodeSet.stream()
 				.map( n -> n.getPrefix() )
-				.collect(Collectors.toSet());
+				.forEach(retVal::add);
+		return retVal;
 	}
 	
 	public Collection<V> valuesWithPrefix(String prefix) {
@@ -201,9 +209,11 @@ public class TernaryTree<V> implements Map<String, V> {
 		}
 		lock.unlock();
 		
-		return visitor.nodeSet.stream()
+		ArrayList<V> values = new ArrayList<>();
+		visitor.nodeSet.stream()
 				.map( n -> n.getValue() )
-				.collect(Collectors.toSet());
+				.forEach(values::add);
+		return values;
 	}
 	
 	public Set<java.util.Map.Entry<String, V>> entriesWithPrefix(String prefix) {
@@ -224,11 +234,13 @@ public class TernaryTree<V> implements Map<String, V> {
 		}
 		lock.unlock();
 		
-		return visitor.nodeSet.stream()
-				.map( n -> {
-					return new Entry(n.getPrefix(), n.getValue());
-				})
-				.collect(Collectors.toSet());
+		LinkedHashSet<java.util.Map.Entry<String, V>> retVal = new LinkedHashSet<>();
+		visitor.nodeSet.stream()
+			.map( n -> {
+				return new Entry(n.getPrefix(), n.getValue());
+			})
+			.forEach(retVal::add);
+		return retVal;
 	}
 	
 	public Set<String> keysContaining(String infix) {
@@ -243,9 +255,11 @@ public class TernaryTree<V> implements Map<String, V> {
 		}
 		lock.unlock();
 		
-		return visitor.nodeSet.stream()
+		LinkedHashSet<String> retVal = new LinkedHashSet<>();
+		visitor.nodeSet.stream()
 				.map( n -> n.getPrefix() )
-				.collect(Collectors.toSet());
+				.forEach(retVal::add);
+		return retVal;
 	}
 	
 	public Collection<V> valuesForKeysContaining(String infix) {
@@ -260,9 +274,11 @@ public class TernaryTree<V> implements Map<String, V> {
 		}
 		lock.unlock();
 		
-		return visitor.nodeSet.stream()
+		ArrayList<V> values = new ArrayList<>();
+		visitor.nodeSet.stream()
 				.map( n -> n.getValue() )
-				.collect(Collectors.toSet());
+				.forEach(values::add);
+		return values;
 	}
 	
 	public Set<java.util.Map.Entry<String, V>> entriesForKeysContaining(String infix) {
@@ -277,11 +293,13 @@ public class TernaryTree<V> implements Map<String, V> {
 		}
 		lock.unlock();
 		
-		return visitor.nodeSet.stream()
-				.map( n -> {
-					return new Entry(n.getPrefix(), n.getValue());
-				})
-				.collect(Collectors.toSet());
+		LinkedHashSet<java.util.Map.Entry<String, V>> retVal = new LinkedHashSet<>();
+		visitor.nodeSet.stream()
+			.map( n -> {
+				return new Entry(n.getPrefix(), n.getValue());
+			})
+			.forEach(retVal::add);
+		return retVal;
 	}
 	
 	public Set<String> keysEndingWith(String suffix) {
@@ -447,50 +465,6 @@ public class TernaryTree<V> implements Map<String, V> {
 		
 	}
 	
-//	private class ValuesForKeyContainsVisitor extends ContainsVisitor<Collection<V>> {
-//
-//		public ValuesForKeyContainsVisitor(String txt, boolean caseSensitive) {
-//			super(txt, caseSensitive);
-//		}
-//
-//		private final Collection<V> values = new ArrayList<V>();
-//		
-//		@Override
-//		public Collection<V> getResult() {
-//			return values;
-//		}
-//
-//		@Override
-//		public void accept(TernaryTreeNode<V> node) {
-//			final ValuesVisitor visitor = new ValuesVisitor();
-//			node.acceptVisitOnlyCenter(visitor);
-//			values.addAll(visitor.values);
-//		}
-//		
-//	}
-//	
-//	private class EntriesForKeyContainsVisitor extends ContainsVisitor<Set<Map.Entry<String, V>>> {
-//		
-//		private Set<Map.Entry<String, V>> entrySet = new LinkedHashSet<Map.Entry<String,V>>();
-//		
-//		public EntriesForKeyContainsVisitor(String txt, boolean caseSensitive) {
-//			super(txt, caseSensitive);
-//		}
-//
-//		@Override
-//		public Set<java.util.Map.Entry<String, V>> getResult() {
-//			return entrySet;
-//		}
-//
-//		@Override
-//		public void accept(TernaryTreeNode<V> node) {
-//			final EntryVisitor visitor = new EntryVisitor();
-//			node.acceptVisitOnlyCenter(visitor);
-//			entrySet.addAll(visitor.values);
-//		}
-//		
-//	}
-	
 	private abstract class EndsWithVisitor<T> implements TernaryTreeNodeVisitor<V> {
 		
 		private String txt;
@@ -598,30 +572,6 @@ public class TernaryTree<V> implements Map<String, V> {
 		}
 		
 	}
-	
-//	private class ValuesVisitor implements TernaryTreeNodeVisitor<V> {
-//		final Collection<V> values = new ArrayList<V>();
-//
-//		@Override
-//		public boolean visit(TernaryTreeNode<V> node) {
-//			if(node.isTerminated())
-//				values.add(node.getValue());
-//			return false;
-//		}
-//	}
-//	
-//	private class EntryVisitor implements TernaryTreeNodeVisitor<V> {
-//		final Set<Map.Entry<String, V>> values = new LinkedHashSet<Map.Entry<String, V>>();
-//
-//		@Override
-//		public boolean visit(TernaryTreeNode<V> node) {
-//			if(node.isTerminated()) {
-//				final Entry entry = new Entry(node.getPrefix(), node.getValue());
-//				values.add(entry);
-//			}
-//			return false;
-//		}
-//	}
 	
 	private class Entry implements Map.Entry<String, V> {
 		

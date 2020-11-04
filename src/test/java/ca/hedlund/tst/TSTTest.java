@@ -33,14 +33,15 @@ public class TSTTest {
 		
 		tree.put("ABCD 1231 This is a test", "1");
 		tree.put("ABCD 1232 This is A test", "1");
-		tree.put("ABCD 123", "1");
+		tree.put("ABCD 1234", "1");
 		tree.put("ABCD 1233 This is B test", "1");
 		tree.put("ABCD 1234 This is C test", "1");
 		tree.put("ABCD 1235 This is D test", "1");
 		
-		for(Entry<String, String> entries:tree.entriesForKeysContaining("ABCD 123", false)) {
+		for(Entry<String, String> entries:tree.entriesForKeysContaining("ABCD 1234", false)) {
 			System.out.println(entries.getKey() + " = " + entries.getValue());
 		}
+		System.out.println(tree.keySet());
 	}
 	
 	public void addCompletion(String path, TernaryTree<String> test) {
