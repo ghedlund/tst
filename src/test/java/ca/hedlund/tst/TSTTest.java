@@ -29,14 +29,14 @@ public class TSTTest {
 	@Test
 	public void test() {
 		final TernaryTree<String> tree = new TernaryTree<String>();
-		tree.put("hello", "world");
 		
-		tree.put("ABCD 1231 This is a test", "1");
-		tree.put("ABCD 1232 This is A test", "1");
-		tree.put("ABCD 1234", "1");
-		tree.put("ABCD 1233 This is B test", "1");
-		tree.put("ABCD 1234 This is C test", "1");
-		tree.put("ABCD 1235 This is D test", "1");
+		tree.put("hello", "world");
+		tree.put("cute", "1");
+		tree.put("cup", "1");
+		tree.put("at", "1");
+		tree.put("he", "1");
+		tree.put("us", "1");
+		tree.put("i", "1");
 		
 		for(Entry<String, String> entries:tree.entriesForKeysContaining("ABCD 1234", false)) {
 			System.out.println(entries.getKey() + " = " + entries.getValue());
