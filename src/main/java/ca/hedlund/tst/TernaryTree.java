@@ -80,7 +80,7 @@ public class TernaryTree<V> implements Map<String, V> {
 
 	public boolean containsKey(Object key, boolean caseSensitive) {
 		final TernaryTreeNode<V> node = findNode(key.toString(), caseSensitive, false);
-		return (node != null);
+		return (node != null && node.getValue() != null);
 	}
 
 	@Override
