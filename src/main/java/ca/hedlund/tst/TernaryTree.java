@@ -343,7 +343,30 @@ public class TernaryTree<V> implements Map<String, V> {
 		lock.unlock();
 		return visitor.getResult();
 	}
-	
+
+	/**
+	 * Find the node for the given key (if exists)
+	 *
+	 * @param key
+	 *
+	 * @return the node for key or null if it does not exist
+	 */
+	public TernaryTreeNode<V> findNode(String key) {
+		return findNode(key, true, false);
+	}
+
+	/**
+	 * Find the node for the given key (if exists)
+	 *
+	 * @param key
+	 * @param caseSensitive
+	 *
+	 * @return the node for key or null if it does not exist
+	 */
+	public TernaryTreeNode<V> findNode(String key, boolean caseSensitive) {
+		return findNode(key, caseSensitive, false);
+	}
+
 	/**
 	 * Find the node for the given key
 	 * 
@@ -352,7 +375,7 @@ public class TernaryTree<V> implements Map<String, V> {
 	 * @return the node for the given key or
 	 *  <code>null</code> if not found
 	 */
-	public TernaryTreeNode<V> findNode(String key, boolean caseSensitive, boolean create) {
+	TernaryTreeNode<V> findNode(String key, boolean caseSensitive, boolean create) {
 		if(key.length() == 0) return null;
 		TernaryTreeNode<V> retVal = null;
 		
