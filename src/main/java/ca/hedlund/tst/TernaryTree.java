@@ -375,7 +375,7 @@ public class TernaryTree<V> implements Map<String, V> {
 	 * @return the node for the given key or
 	 *  <code>null</code> if not found
 	 */
-	TernaryTreeNode<V> findNode(String key, boolean caseSensitive, boolean create) {
+	public TernaryTreeNode<V> findNode(String key, boolean caseSensitive, boolean create) {
 		if(key.length() == 0) return null;
 		TernaryTreeNode<V> retVal = null;
 		
