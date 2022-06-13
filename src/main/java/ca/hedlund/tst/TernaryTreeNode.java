@@ -22,7 +22,8 @@ package ca.hedlund.tst;
  * 
  * @param <V>
  */
-public class TernaryTreeNode<V> {
+public class
+TernaryTreeNode<V> {
 	
 	public static enum Position {
 		LOW,
@@ -242,6 +243,24 @@ public class TernaryTreeNode<V> {
 		if(getCenter() != null)
 			getCenter().acceptVisitMiddle(visitor);
 		visitor.visit(this);
+	}
+
+	public TernaryTreeNodePath getPath() {
+		TernaryTreeNodePath path = new TernaryTreeNodePath();
+
+		TernaryTreeNode<V> node = this;
+		while(node.getParent() != null) {
+			if(node.getParent().getLeft() == node) {
+				path.pushLeft();
+			} else if(node.getParent().getCenter() == node) {
+				path.pushCenter();
+			} else if(node.getParent().getRight() == node) {
+				path.pushRight();
+			}
+			node = node.getParent();
+		}
+
+		return path;
 	}
 	
 }

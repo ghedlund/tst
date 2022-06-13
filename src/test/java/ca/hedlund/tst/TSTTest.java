@@ -19,7 +19,7 @@ package ca.hedlund.tst;
 import java.io.File;
 import java.util.Map.Entry;
 
-import org.junit.Test;
+import org.junit.*;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
@@ -29,17 +29,23 @@ public class TSTTest {
 	@Test
 	public void test() {
 		final TernaryTree<String> tree = new TernaryTree<String>();
-		
+
 		tree.put("hello", "world");
 		tree.put("cute", "1");
-		tree.put("cup", "1");
+		tree.put("acup", "1");
 		tree.put("at", "1");
 		tree.put("he", "1");
 		tree.put("us", "1");
 		tree.put("i", "1");
-		
+
 		for(Entry<String, String> entries:tree.entriesForKeysContaining("cu", false)) {
 			System.out.println(entries.getKey() + " = " + entries.getValue());
+		}
+		for(Entry<String, String> entries:tree.entrySet()) {
+			TernaryTreeNode<String> node = tree.findNode(entries.getKey());
+			TernaryTreeNodePath path = node.getPath();
+			TernaryTreeNode<String> followPath = path.followPath(tree.getRoot());
+			Assert.assertEquals(node, followPath);
 		}
 		System.out.println(tree.keySet());
 	}
