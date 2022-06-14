@@ -17,6 +17,7 @@
 package ca.hedlund.tst;
 
 import java.io.*;
+import java.nio.ByteBuffer;
 import java.util.Map.Entry;
 import java.util.Optional;
 
@@ -27,8 +28,7 @@ import org.junit.runners.JUnit4;
 @RunWith(JUnit4.class)
 public class TSTTest {
 
-	@Test
-	public void test() {
+	public TernaryTree<String> createTestTree() {
 		final TernaryTree<String> tree = new TernaryTree<String>();
 
 		tree.put("hello", "world");
@@ -39,11 +39,15 @@ public class TSTTest {
 		tree.put("us", "1");
 		tree.put("i", "1");
 
-		for(Entry<String, String> entries:tree.entriesForKeysContaining("cu", false)) {
-			System.out.println(entries.getKey() + " = " + entries.getValue());
-		}
-		for(Entry<String, String> entries:tree.entrySet()) {
-			Optional<TernaryTreeNode<String>> node = tree.findNode(entries.getKey());
+		return tree;
+	}
+
+	@Test
+	public void testNodePaths() {
+		final TernaryTree<String> tree = createTestTree();
+
+		for(Entry<String, String> entry:tree.entrySet()) {
+			Optional<TernaryTreeNode<String>> node = tree.findNode(entry.getKey());
 			Assert.assertTrue(node.isPresent());
 			TernaryTreeNodePath path = node.get().getPath();
 			Optional<TernaryTreeNode<String>> followPath = path.followPath(tree.getRoot());
@@ -51,34 +55,39 @@ public class TSTTest {
 			Assert.assertEquals(node.get(), followPath.get());
 		}
 	}
-	
-	public void addCompletion(String path, TernaryTree<String> test) {
-		if(!test.containsKey(path) && path.lastIndexOf('.') > 0)
-			test.put(path.substring(0, path.lastIndexOf('.')), "");
-	}
-	
-	public void scanFolder(File folder, TernaryTree<String> tree) {
-		if(folder.isDirectory()) {
-			for(File file:folder.listFiles()) {
-				if(file.isDirectory()) 
-					scanFolder(file, tree);
-				else
-					addCompletion(file.getName(), tree);
-			}
-		} else {
-			addCompletion(folder.getName(), tree);
-		}
-	}
-	
+
 	@Test
-	public void test2() {
-		final TernaryTree<String> tree = new TernaryTree<String>();
-		tree.put("hello", "world");
-		
-		scanFolder(new File("/Volumes/Samsung_T5/Movies"), tree);
-		for(Entry<String, String> entries:tree.entriesForKeysContaining("The Golden Girls S01E07", false)) {
-			System.out.println(entries.getKey() + " = " + entries.getValue());
+	public void testSerialization() throws IOException, ClassNotFoundException {
+		final TernaryTree<String> tree = createTestTree();
+
+		// write tree
+		ByteArrayOutputStream bout = new ByteArrayOutputStream();
+		ObjectOutputStream oout = new ObjectOutputStream(bout);
+
+		oout.writeObject(tree);
+		oout.flush();
+		oout.close();
+
+		// read tree
+		ByteArrayInputStream bin = new ByteArrayInputStream(bout.toByteArray());
+		ObjectInputStream oin = new ObjectInputStream(bin);
+
+		final TernaryTree<String> tree2 = (TernaryTree<String>) oin.readObject();
+
+		for(Entry<String, String> entry:tree.entrySet()) {
+			Optional<TernaryTreeNode<String>> node = tree.findNode(entry.getKey());
+			Assert.assertTrue(node.isPresent());
+			Assert.assertTrue(node.get().isTerminated());
+			TernaryTreeNodePath nodePath = node.get().getPath();
+
+			Optional<TernaryTreeNode<String>> node2 = tree2.findNode(entry.getKey());
+			Assert.assertTrue(node2.isPresent());
+			Assert.assertTrue(node2.get().isTerminated());
+			Assert.assertEquals(entry.getValue(), node2.get().getValue());
+			TernaryTreeNodePath node2Path = node2.get().getPath();
+
+			Assert.assertArrayEquals(nodePath.toByteArray(), node2Path.toByteArray());
 		}
 	}
-	
+
 }

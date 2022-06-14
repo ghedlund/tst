@@ -15,7 +15,7 @@
  */
 package ca.hedlund.tst;
 
-import java.io.Serializable;
+import java.io.*;
 import java.util.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -40,12 +40,12 @@ public class TernaryTree<V> implements Map<String, V>, Serializable {
 	/**
 	 * re-entrant lock
 	 */
-	private transient final Lock lock = new ReentrantLock();
+	private final Lock lock = new ReentrantLock();
 	
 	/**
 	 * Collator
 	 */
-	private transient final Comparator<Character> comparator;
+	private final Comparator<Character> comparator;
 
 	public TernaryTree() {
 		this(null);
@@ -637,4 +637,5 @@ public class TernaryTree<V> implements Map<String, V>, Serializable {
 		}
 		
 	}
+
 }

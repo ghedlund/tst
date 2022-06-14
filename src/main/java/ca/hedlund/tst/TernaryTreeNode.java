@@ -263,7 +263,7 @@ public class TernaryTreeNode<V> implements Serializable {
 		return path;
 	}
 
-	public void readObject(ObjectInputStream ois) throws IOException, ClassNotFoundException {
+	private void readObject(ObjectInputStream ois) throws IOException, ClassNotFoundException {
 		ois.defaultReadObject();
 		if(getLeft() != null)
 			getLeft().setParent(this);
