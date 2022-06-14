@@ -16,8 +16,9 @@
  */
 package ca.hedlund.tst;
 
-import java.io.File;
+import java.io.*;
 import java.util.Map.Entry;
+import java.util.Optional;
 
 import org.junit.*;
 import org.junit.runner.RunWith;
@@ -42,12 +43,13 @@ public class TSTTest {
 			System.out.println(entries.getKey() + " = " + entries.getValue());
 		}
 		for(Entry<String, String> entries:tree.entrySet()) {
-			TernaryTreeNode<String> node = tree.findNode(entries.getKey());
-			TernaryTreeNodePath path = node.getPath();
-			TernaryTreeNode<String> followPath = path.followPath(tree.getRoot());
-			Assert.assertEquals(node, followPath);
+			Optional<TernaryTreeNode<String>> node = tree.findNode(entries.getKey());
+			Assert.assertTrue(node.isPresent());
+			TernaryTreeNodePath path = node.get().getPath();
+			Optional<TernaryTreeNode<String>> followPath = path.followPath(tree.getRoot());
+			Assert.assertTrue(followPath.isPresent());
+			Assert.assertEquals(node.get(), followPath.get());
 		}
-		System.out.println(tree.keySet());
 	}
 	
 	public void addCompletion(String path, TernaryTree<String> test) {

@@ -1,12 +1,13 @@
 package ca.hedlund.tst;
 
+import java.io.Serializable;
 import java.util.*;
 
 /**
  * A path within a ternary tree.
  *
  */
-public class TernaryTreeNodePath {
+public class TernaryTreeNodePath implements Serializable {
 
 	private final static byte END_PATH = 0x00;
 
@@ -16,7 +17,7 @@ public class TernaryTreeNodePath {
 
 	private final static byte CENTER_CHILD = 0x03;
 
-	private final static long NODE_PATH_MASK = 0x0FFFFFFFFFFFFFFFL;
+	private final static int PATH_MASK = 0x0003;
 
 	private byte path[];
 
@@ -36,7 +37,7 @@ public class TernaryTreeNodePath {
 	public int pathLength() {
 		if(this.path.length == 0) return 0;
 
-		long lp = this.path[this.path.length-1];
+		long lp = this.path[this.path.length-2];
 		int zeros = Long.numberOfLeadingZeros(lp);
 		// we might have a zero in the  left-most position of the last movement
 		if(zeros % 2 == 1) --zeros;
@@ -66,7 +67,7 @@ public class TernaryTreeNodePath {
 			rollover();
 		}
 		path[0] = (byte)(((int)path[0] << 2) & 0xFF);
-		path[0] = (byte)((path[0] & 0xFC) | (value & 0x03));
+		path[0] = (byte)((path[0] & 0xFC) | (value & PATH_MASK));
 	}
 
 	public void pushLeft() {
@@ -90,13 +91,12 @@ public class TernaryTreeNodePath {
 	 *
 	 * @param root
 	 */
-	public <T> TernaryTreeNode<T> followPath(TernaryTreeNode<T> root) {
+	public <T> Optional<TernaryTreeNode<T>> followPath(TernaryTreeNode<T> root) {
 		TernaryTreeNode<T> retVal = root;
-
 		for(int i = 0; i < this.path.length - 1; i++) {
 			byte b = this.path[i];
 			for(int shift = 0; shift < 8; shift += 2) {
-				byte movement = (byte)((b >> shift) & 0x03);
+				byte movement = (byte)((b >> shift) & PATH_MASK);
 				switch(movement) {
 					case LEFT_CHILD:
 						retVal = retVal.getLeft();
@@ -113,12 +113,11 @@ public class TernaryTreeNodePath {
 					default:
 						break;
 				}
-				if(retVal == null) break;
+				if(retVal == null)
+					return Optional.empty();
 			}
-			if(retVal == null) break;
 		}
-
-		return retVal;
+		return Optional.of(retVal);
 	}
 
 }

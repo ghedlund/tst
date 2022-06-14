@@ -15,38 +15,38 @@
  */
 package ca.hedlund.tst;
 
-
+import java.io.*;
 
 /**
  * Node for ternary trees.
  * 
  * @param <V>
  */
-public class
-TernaryTreeNode<V> {
+public class TernaryTreeNode<V> implements Serializable {
 	
-	public static enum Position {
+	public enum Position {
 		LOW,
 		EQUAL,
-		HIGH;
+		HIGH
 	}
-	
+
+	/**
+	 * parent reference
+	 */
+	private transient TernaryTreeNode<V> parent;
+
 	/**
 	 * Node char
 	 */
 	private volatile char ch;
-	
+
 	/**
 	 * Node value, a node is 'terminated' if it's
 	 * value is non-<code>null</code>.
 	 */
 	private V value;
-	
-	/**
-	 * parent reference
-	 */
-	private TernaryTreeNode<V> parent;
-	
+
+
 	/**
 	 * Atomic reference to left child
 	 */
@@ -56,7 +56,6 @@ TernaryTreeNode<V> {
 	 * Atomic reference to right child
 	 */
 	private TernaryTreeNode<V> right;
-	
 	
 	/**
 	 * Atomic reference to center child
@@ -187,7 +186,8 @@ TernaryTreeNode<V> {
 	
 	/**
 	 * Returns the full string key for this node
-	 * @return
+	 *
+	 * @return node prefix
 	 */
 	public String getPrefix() {
 		final StringBuffer buffer = new StringBuffer();
@@ -249,12 +249,12 @@ TernaryTreeNode<V> {
 		TernaryTreeNodePath path = new TernaryTreeNodePath();
 
 		TernaryTreeNode<V> node = this;
-		while(node.getParent() != null) {
-			if(node.getParent().getLeft() == node) {
+		while (node.getParent() != null) {
+			if (node.getParent().getLeft() == node) {
 				path.pushLeft();
-			} else if(node.getParent().getCenter() == node) {
+			} else if (node.getParent().getCenter() == node) {
 				path.pushCenter();
-			} else if(node.getParent().getRight() == node) {
+			} else if (node.getParent().getRight() == node) {
 				path.pushRight();
 			}
 			node = node.getParent();
@@ -262,5 +262,15 @@ TernaryTreeNode<V> {
 
 		return path;
 	}
-	
+
+	public void readObject(ObjectInputStream ois) throws IOException, ClassNotFoundException {
+		ois.defaultReadObject();
+		if(getLeft() != null)
+			getLeft().setParent(this);
+		if(getRight() != null)
+			getRight().setParent(this);
+		if(getCenter() != null)
+			getCenter().setParent(this);
+	}
+
 }

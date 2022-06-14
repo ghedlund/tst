@@ -15,13 +15,8 @@
  */
 package ca.hedlund.tst;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.LinkedHashSet;
-import java.util.Map;
-import java.util.Set;
+import java.io.Serializable;
+import java.util.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
@@ -33,7 +28,9 @@ import ca.hedlund.tst.TernaryTreeNode.Position;
  * the default {@link Map} methods are not synchronized.  To obtain a synchronized
  * version of this {@link Map}, use {@link Collections#synchronizedMap(Map)}.</p>
  */
-public class TernaryTree<V> implements Map<String, V> {
+public class TernaryTree<V> implements Map<String, V>, Serializable {
+
+	private static final long serialVersionUID = 1L;
 	
 	/**
 	 * Root
@@ -43,12 +40,12 @@ public class TernaryTree<V> implements Map<String, V> {
 	/**
 	 * re-entrant lock
 	 */
-	private final Lock lock = new ReentrantLock();
+	private transient final Lock lock = new ReentrantLock();
 	
 	/**
 	 * Collator
 	 */
-	private final Comparator<Character> comparator;
+	private transient final Comparator<Character> comparator;
 
 	public TernaryTree() {
 		this(null);
@@ -79,8 +76,8 @@ public class TernaryTree<V> implements Map<String, V> {
 	}
 
 	public boolean containsKey(Object key, boolean caseSensitive) {
-		final TernaryTreeNode<V> node = findNode(key.toString(), caseSensitive, false);
-		return (node != null && node.getValue() != null);
+		final Optional<TernaryTreeNode<V>> node = findNode(key.toString(), caseSensitive, false);
+		return node.isPresent() && node.get().isTerminated();
 	}
 
 	@Override
@@ -90,20 +87,22 @@ public class TernaryTree<V> implements Map<String, V> {
 
 	@Override
 	public V get(Object key) {
-		final TernaryTreeNode<V> node = findNode(key.toString(), true, false);
-		return (node == null ? null : node.getValue());
+		final Optional<TernaryTreeNode<V>> node = findNode(key.toString(), true, false);
+		return node.isPresent() ? node.get().getValue() : null;
 	}
 
 	@Override
 	public V put(String key, V value) {
-		final TernaryTreeNode<V> node = findNode(key, true, true);
-		return node.setValue(value);
+		final Optional<TernaryTreeNode<V>> node = findNode(key, true, true);
+		return node.get().setValue(value);
 	}
 
 	@Override
 	public V remove(Object key) {
-		final TernaryTreeNode<V> node = findNode(key.toString(), true, false);
-		return (node != null ? node.setValue(null) : null);
+		final Optional<TernaryTreeNode<V>> node = findNode(key.toString(), true, false);
+		final V retVal = node.isPresent() ? node.get().getValue() : null;
+		if(node.isPresent()) node.get().setValue(null);
+		return retVal;
 	}
 
 	@Override
@@ -174,9 +173,10 @@ public class TernaryTree<V> implements Map<String, V> {
 	
 	public Set<String> keysWithPrefix(String prefix, boolean caseSensitive) {
 		final AccumulatingNodeVisitor visitor = new AccumulatingNodeVisitor();
-		final TernaryTreeNode<V> node = findNode(prefix, caseSensitive, false);
+		final Optional<TernaryTreeNode<V>> nodeOpt = findNode(prefix, caseSensitive, false);
 		lock.lock();
-		if(node != null ) {
+		if(nodeOpt.isPresent()) {
+			final TernaryTreeNode<V> node = nodeOpt.get();
 			if(node.isTerminated())
 				visitor.nodeSet.add(node);
 			if(node.getCenter() != null)
@@ -197,9 +197,10 @@ public class TernaryTree<V> implements Map<String, V> {
 	
 	public Collection<V> valuesWithPrefix(String prefix, boolean caseSensitive) {
 		final AccumulatingNodeVisitor visitor = new AccumulatingNodeVisitor();
-		final TernaryTreeNode<V> node = findNode(prefix, caseSensitive, false);
+		final Optional<TernaryTreeNode<V>> nodeOpt = findNode(prefix, caseSensitive, false);
 		lock.lock();
-		if(node != null) {
+		if(nodeOpt.isPresent()) {
+			final TernaryTreeNode<V> node = nodeOpt.get();
 			if(node.isTerminated()) {
 				visitor.nodeSet.add(node);
 			}
@@ -222,9 +223,10 @@ public class TernaryTree<V> implements Map<String, V> {
 	
 	public Set<java.util.Map.Entry<String, V>> entriesWithPrefix(String prefix, boolean caseSensitive) {
 		final AccumulatingNodeVisitor visitor = new AccumulatingNodeVisitor();
-		final TernaryTreeNode<V> node = findNode(prefix, caseSensitive, false);
+		final Optional<TernaryTreeNode<V>> nodeOpt = findNode(prefix, caseSensitive, false);
 		lock.lock();
-		if(node != null) {
+		if(nodeOpt.isPresent()) {
+			final TernaryTreeNode<V> node = nodeOpt.get();
 			if(node.isTerminated()) {
 				visitor.nodeSet.add(node);
 			}
@@ -345,13 +347,23 @@ public class TernaryTree<V> implements Map<String, V> {
 	}
 
 	/**
+	 * Find node for given path
+	 *
+	 * @param path
+	 * @return optional node for given path
+	 */
+	public Optional<TernaryTreeNode<V>> findNode(TernaryTreeNodePath path) {
+		return path.followPath(this.getRoot());
+	}
+
+	/**
 	 * Find the node for the given key (if exists)
 	 *
 	 * @param key
 	 *
 	 * @return the node for key or null if it does not exist
 	 */
-	public TernaryTreeNode<V> findNode(String key) {
+	public Optional<TernaryTreeNode<V>> findNode(String key) {
 		return findNode(key, true, false);
 	}
 
@@ -363,7 +375,7 @@ public class TernaryTree<V> implements Map<String, V> {
 	 *
 	 * @return the node for key or null if it does not exist
 	 */
-	public TernaryTreeNode<V> findNode(String key, boolean caseSensitive) {
+	public Optional<TernaryTreeNode<V>> findNode(String key, boolean caseSensitive) {
 		return findNode(key, caseSensitive, false);
 	}
 
@@ -375,7 +387,7 @@ public class TernaryTree<V> implements Map<String, V> {
 	 * @return the node for the given key or
 	 *  <code>null</code> if not found
 	 */
-	public TernaryTreeNode<V> findNode(String key, boolean caseSensitive, boolean create) {
+	public Optional<TernaryTreeNode<V>> findNode(String key, boolean caseSensitive, boolean create) {
 		if(key.length() == 0) return null;
 		TernaryTreeNode<V> retVal = null;
 		
@@ -427,7 +439,7 @@ public class TernaryTree<V> implements Map<String, V> {
 		
 		lock.unlock();
 		
-		return retVal;
+		return retVal == null ? Optional.empty() : Optional.of(retVal);
 	}
 	
 	/* Internal Visitors */
