@@ -23,7 +23,9 @@ import java.io.*;
  * @param <V>
  */
 public class TernaryTreeNode<V> implements Serializable {
-	
+
+	private static final long serialVersionUID = 1L;
+
 	public enum Position {
 		LOW,
 		EQUAL,

@@ -9,6 +9,8 @@ import java.util.*;
  */
 public class TernaryTreeNodePath implements Serializable {
 
+	private static final long serialVersionUID = 1L;
+
 	private final static byte END_PATH = 0x00;
 
 	private final static byte LEFT_CHILD = 0x01;
