@@ -388,7 +388,7 @@ public class TernaryTree<V> implements Map<String, V>, Serializable {
 	 *  <code>null</code> if not found
 	 */
 	public Optional<TernaryTreeNode<V>> findNode(String key, boolean caseSensitive, boolean create) {
-		if(key.length() == 0) return null;
+		if(key.length() == 0) return Optional.empty();
 		TernaryTreeNode<V> retVal = null;
 		
 		lock.lock();
