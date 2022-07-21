@@ -35,7 +35,7 @@ public class TernaryTree<V> implements Map<String, V>, Serializable {
 	/**
 	 * Root
 	 */
-	private TernaryTreeNode<V> root = null;
+	private TernaryTreeNode<V> root = new TernaryTreeEmptyStringNode<V>(null);
 	
 	/**
 	 * re-entrant lock
@@ -388,7 +388,7 @@ public class TernaryTree<V> implements Map<String, V>, Serializable {
 	 *  <code>null</code> if not found
 	 */
 	public Optional<TernaryTreeNode<V>> findNode(String key, boolean caseSensitive, boolean create) {
-		if(key.length() == 0) return Optional.empty();
+		if(key.length() == 0) return Optional.of(root);
 		TernaryTreeNode<V> retVal = null;
 		
 		lock.lock();
@@ -636,6 +636,23 @@ public class TernaryTree<V> implements Map<String, V>, Serializable {
 			return oldVal;
 		}
 		
+	}
+
+	private class TernaryTreeEmptyStringNode<V> extends TernaryTreeNode<V> {
+
+		public TernaryTreeEmptyStringNode(TernaryTreeNode<V> parent) {
+			super(parent, '\u0000');
+		}
+
+		public TernaryTreeEmptyStringNode(TernaryTreeNode<V> parent, V value) {
+			super(parent, '\u0000', value);
+		}
+
+		@Override
+		public String getPrefix() {
+			return "";
+		}
+
 	}
 
 }

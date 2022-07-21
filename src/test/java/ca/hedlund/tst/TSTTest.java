@@ -31,6 +31,7 @@ public class TSTTest {
 	public TernaryTree<String> createTestTree() {
 		final TernaryTree<String> tree = new TernaryTree<String>();
 
+		tree.put("", "empty");
 		tree.put("hello", "world");
 		tree.put("cute", "1");
 		tree.put("acup", "1");
