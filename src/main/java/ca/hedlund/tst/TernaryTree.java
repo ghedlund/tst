@@ -119,7 +119,7 @@ public class TernaryTree<V> implements Map<String, V>, Serializable {
 
 	@Override
 	public Set<String> keySet() {
-		final AccumulatingNodeVisitor visitor = new AccumulatingNodeVisitor();
+		final AccumulatingNodeVisitor<V> visitor = new AccumulatingNodeVisitor<>();
 		lock.lock();
 		final TernaryTreeNode<V> root = getRoot();
 		if(root != null)
@@ -135,7 +135,7 @@ public class TernaryTree<V> implements Map<String, V>, Serializable {
 
 	@Override
 	public Collection<V> values() {
-		final AccumulatingNodeVisitor visitor = new AccumulatingNodeVisitor();
+		final AccumulatingNodeVisitor<V> visitor = new AccumulatingNodeVisitor<>();
 		lock.lock();
 		final TernaryTreeNode<V> root = getRoot();
 		if(root != null)
@@ -151,7 +151,7 @@ public class TernaryTree<V> implements Map<String, V>, Serializable {
 
 	@Override
 	public Set<java.util.Map.Entry<String, V>> entrySet() {
-		final AccumulatingNodeVisitor visitor = new AccumulatingNodeVisitor();
+		final AccumulatingNodeVisitor<V> visitor = new AccumulatingNodeVisitor<>();
 		lock.lock();
 		final TernaryTreeNode<V> root = getRoot();
 		if(root != null)
@@ -172,7 +172,7 @@ public class TernaryTree<V> implements Map<String, V>, Serializable {
 	}
 	
 	public Set<String> keysWithPrefix(String prefix, boolean caseSensitive) {
-		final AccumulatingNodeVisitor visitor = new AccumulatingNodeVisitor();
+		final AccumulatingNodeVisitor<V> visitor = new AccumulatingNodeVisitor<>();
 		final Optional<TernaryTreeNode<V>> nodeOpt = findNode(prefix, caseSensitive, false);
 		lock.lock();
 		if(nodeOpt.isPresent()) {
@@ -196,7 +196,7 @@ public class TernaryTree<V> implements Map<String, V>, Serializable {
 	}
 	
 	public Collection<V> valuesWithPrefix(String prefix, boolean caseSensitive) {
-		final AccumulatingNodeVisitor visitor = new AccumulatingNodeVisitor();
+		final AccumulatingNodeVisitor<V> visitor = new AccumulatingNodeVisitor<>();
 		final Optional<TernaryTreeNode<V>> nodeOpt = findNode(prefix, caseSensitive, false);
 		lock.lock();
 		if(nodeOpt.isPresent()) {
@@ -222,7 +222,7 @@ public class TernaryTree<V> implements Map<String, V>, Serializable {
 	}
 	
 	public Set<java.util.Map.Entry<String, V>> entriesWithPrefix(String prefix, boolean caseSensitive) {
-		final AccumulatingNodeVisitor visitor = new AccumulatingNodeVisitor();
+		final AccumulatingNodeVisitor<V> visitor = new AccumulatingNodeVisitor<V>();
 		final Optional<TernaryTreeNode<V>> nodeOpt = findNode(prefix, caseSensitive, false);
 		lock.lock();
 		if(nodeOpt.isPresent()) {
@@ -250,7 +250,7 @@ public class TernaryTree<V> implements Map<String, V>, Serializable {
 	}
 	
 	public Set<String> keysContaining(String infix, boolean caseSensitive) {
-		final NodeContainsVisitor visitor = new NodeContainsVisitor(infix, caseSensitive);
+		final NodeContainsVisitor<V> visitor = new NodeContainsVisitor<>(infix, caseSensitive);
 		lock.lock();
 		if(getRoot() != null) {
 			getRoot().acceptVisitMiddle(visitor);
@@ -269,7 +269,7 @@ public class TernaryTree<V> implements Map<String, V>, Serializable {
 	}
 	
 	public Collection<V> valuesForKeysContaining(String infix, boolean caseSensitive) {
-		final NodeContainsVisitor visitor = new NodeContainsVisitor(infix, caseSensitive);
+		final NodeContainsVisitor<V> visitor = new NodeContainsVisitor<V>(infix, caseSensitive);
 		lock.lock();
 		if(getRoot() != null) {
 			getRoot().acceptVisitMiddle(visitor);
@@ -288,7 +288,7 @@ public class TernaryTree<V> implements Map<String, V>, Serializable {
 	}
 	
 	public Set<java.util.Map.Entry<String, V>> entriesForKeysContaining(String infix, boolean caseSensitive) {
-		final NodeContainsVisitor visitor = new NodeContainsVisitor(infix, caseSensitive);
+		final NodeContainsVisitor<V> visitor = new NodeContainsVisitor<>(infix, caseSensitive);
 		lock.lock();
 		if(getRoot() != null) {
 			getRoot().acceptVisitMiddle(visitor);
@@ -443,99 +443,7 @@ public class TernaryTree<V> implements Map<String, V>, Serializable {
 	}
 	
 	/* Internal Visitors */
-	private abstract class ContainsVisitor<T> implements TernaryTreeNodeVisitor<V> {
-
-		private final String txt;
-		
-		private boolean caseSensitive = true;
-		
-		public ContainsVisitor(String txt, boolean caseSensitive) {
-			this.txt = txt;
-			this.caseSensitive = caseSensitive;
-		}
-		
-		@Override
-		public boolean visit(TernaryTreeNode<V> node) {
-			if(txt.length() == 0) return false;
-			
-			final char ch = txt.charAt(txt.length() - 1);
-			boolean matches = (caseSensitive ? node.getChar() == ch : Character.toLowerCase(node.getChar()) == Character.toLowerCase(ch));
-			
-			if(matches) {
-				final String prefix = node.getPrefix();
-				matches = (caseSensitive ? prefix.endsWith(txt) : prefix.toLowerCase().endsWith(txt.toLowerCase()));
-				if(matches) {
-					accept(node);
-					return true;
-				}
-			}
-			return false;
-		}
-		
-		public abstract T getResult();
-	
-		public abstract void accept(TernaryTreeNode<V> node);
-		
-	}
-	
-	private class NodeContainsVisitor extends ContainsVisitor<Set<TernaryTreeNode<V>>> {
-
-		final Set<TernaryTreeNode<V>> nodeSet = new LinkedHashSet<TernaryTreeNode<V>>();
-		
-		public NodeContainsVisitor(String txt, boolean caseSensitive) {
-			super(txt, caseSensitive);
-		}
-
-		@Override
-		public Set<TernaryTreeNode<V>> getResult() {
-			return nodeSet;
-		}
-
-		@Override
-		public void accept(TernaryTreeNode<V> node) {
-			final AccumulatingNodeVisitor visitor = new AccumulatingNodeVisitor();
-			node.acceptVisitOnlyCenter(visitor);
-			nodeSet.addAll(visitor.nodeSet);
-		}
-		
-	}
-	
-	private abstract class EndsWithVisitor<T> implements TernaryTreeNodeVisitor<V> {
-		
-		private String txt;
-		
-		private boolean caseSensitive = true;
-		
-		public EndsWithVisitor(String txt, boolean caseSensitive) {
-			this.txt = txt;
-			this.caseSensitive = caseSensitive;
-		}
-		
-		public abstract T getResult();
-		
-		public abstract void accept(TernaryTreeNode<V> node);
-		
-		@Override
-		public boolean visit(TernaryTreeNode<V> node) {
-			if(txt.length() == 0) return false;
-			
-			final char ch = txt.charAt(txt.length() - 1);
-			boolean matches = (caseSensitive ? node.getChar() == ch : Character.toLowerCase(node.getChar()) == Character.toLowerCase(ch));
-			
-			if(matches) {
-				final String prefix = node.getPrefix();
-				matches = (caseSensitive ? prefix.endsWith(txt) : prefix.toLowerCase().endsWith(txt.toLowerCase()));
-				if(matches && node.isTerminated()) {
-					accept(node);
-					return true;
-				}
-			}
-			return false;
-		}
-	}
-	
-	
-	private class KeyEndsWithVisitor extends EndsWithVisitor<Set<String>> {
+	private class KeyEndsWithVisitor extends EndsWithVisitor<Set<String>, V> {
 
 		final Set<String> keySet = new LinkedHashSet<String>();
 		
@@ -555,7 +463,7 @@ public class TernaryTree<V> implements Map<String, V>, Serializable {
 		
 	}
 
-	private class ValuesForKeyEndsWithVisitor extends EndsWithVisitor<Collection<V>> {
+	private class ValuesForKeyEndsWithVisitor extends EndsWithVisitor<Collection<V>, V> {
 		
 		public ValuesForKeyEndsWithVisitor(String txt, boolean caseSensitive) {
 			super(txt, caseSensitive);
@@ -575,7 +483,7 @@ public class TernaryTree<V> implements Map<String, V>, Serializable {
 		
 	}
 	
-	private class EntriesForKeyEndsWithVisitor extends EndsWithVisitor<Set<Map.Entry<String, V>>> {
+	private class EntriesForKeyEndsWithVisitor extends EndsWithVisitor<Set<Map.Entry<String, V>>, V> {
 		
 		private Set<Map.Entry<String, V>> entrySet = new LinkedHashSet<Map.Entry<String,V>>();
 		
@@ -594,22 +502,9 @@ public class TernaryTree<V> implements Map<String, V>, Serializable {
 		}
 		
 	}
-	
-	private class AccumulatingNodeVisitor implements TernaryTreeNodeVisitor<V> {
-		final Set<TernaryTreeNode<V>> nodeSet = new LinkedHashSet<TernaryTreeNode<V>>();
 
-		@Override
-		public boolean visit(TernaryTreeNode<V> node) {
-			if(node.isTerminated()) {
-				nodeSet.add(node);
-			}
-			return false;
-		}
-		
-	}
-	
 	private class Entry implements Map.Entry<String, V> {
-		
+
 		private final String key;
 		
 		private V value;
