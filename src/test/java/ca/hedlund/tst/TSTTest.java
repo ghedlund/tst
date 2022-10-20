@@ -44,6 +44,22 @@ public class TSTTest {
 	}
 
 	@Test
+	public void testTerminatedNodeIterator() {
+		final TernaryTree<String> tree = createTestTree();
+
+		final TerminatedNodeIterator<String> itr = new TerminatedNodeIterator<>(tree);
+		Assert.assertTrue(itr.hasNext());
+		Assert.assertEquals("empty", itr.next().getValue());
+		itr.reset();
+		int cnt = 0;
+		while(itr.hasNext()) {
+			itr.next();
+			++cnt;
+		}
+		Assert.assertEquals(tree.size(), cnt);
+	}
+
+	@Test
 	public void testNodePaths() {
 		final TernaryTree<String> tree = createTestTree();
 
