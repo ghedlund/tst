@@ -32,13 +32,14 @@ public class TSTTest {
 		final TernaryTree<String> tree = new TernaryTree<String>();
 
 		tree.put("", "empty");
-		tree.put("hello", "world");
-		tree.put("cute", "1");
-		tree.put("acup", "1");
-		tree.put("at", "1");
-		tree.put("he", "1");
-		tree.put("us", "1");
-		tree.put("i", "1");
+		tree.put("stick", "world");
+		tree.put("bat", "1");
+		tree.put("batter", "1");
+		tree.put("art", "1");
+		tree.put("orb", "1");
+		tree.put("artist", "1");
+		tree.put("artup", "1");
+		tree.put("arbitrary", "1");
 
 		return tree;
 	}
@@ -53,7 +54,7 @@ public class TSTTest {
 		itr.reset();
 		int cnt = 0;
 		while(itr.hasNext()) {
-			itr.next();
+			System.out.println(itr.next().getPrefix());
 			++cnt;
 		}
 		Assert.assertEquals(tree.size(), cnt);

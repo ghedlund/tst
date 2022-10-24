@@ -110,9 +110,13 @@ public class TerminatedNodeIterator<V> implements Iterator<TernaryTreeNode<V>> {
 				break;
 		}
 
-		if(node.getParent() != null)
+		if(node.getParent() != null) {
+			final Branch childBranch = getBranch(node.getParent(), node);
+			if(childBranch == Branch.Left && node.getParent().isTerminated()) {
+				return node.getParent();
+			}
 			return continueFromNode(node.getParent(), getBranch(node.getParent(), node).nextBranch());
-		else
+		} else
 			return null;
 	}
 
