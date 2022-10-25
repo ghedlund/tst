@@ -61,6 +61,16 @@ public class TSTTest {
 	}
 
 	@Test
+	public void testTerminatedNodeIteratorWithFilter() {
+		final TernaryTree<String> tree = createTestTree();
+
+		final TerminatedNodeIterator<String> itr = new TerminatedNodeIterator<>(tree, (node) -> tree.get(node.getPrefix()).matches("[0-9]+"));
+		while(itr.hasNext()) {
+			System.out.println(itr.next().getPrefix());
+		}
+	}
+
+	@Test
 	public void testNodePaths() {
 		final TernaryTree<String> tree = createTestTree();
 

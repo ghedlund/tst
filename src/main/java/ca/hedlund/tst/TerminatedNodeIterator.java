@@ -88,7 +88,8 @@ public class TerminatedNodeIterator<V> implements Iterator<TernaryTreeNode<V>> {
 			case Left:
 				if(node.getLeft() != null) {
 					TernaryTreeNode<V> leftVal = continueFromNode(node.getLeft(), Branch.Left);
-					return leftVal;
+					if(leftVal != null)
+						return leftVal;
 				}
 				if(node.isTerminated() && filter.test(node))
 					return node;
@@ -96,7 +97,8 @@ public class TerminatedNodeIterator<V> implements Iterator<TernaryTreeNode<V>> {
 			case Center:
 				if(node.getCenter() != null) {
 					TernaryTreeNode<V> centerVal = continueFromNode(node.getCenter(), Branch.Left);
-					return centerVal;
+					if(centerVal != null)
+						return centerVal;
 				}
 
 			case Right:
