@@ -40,6 +40,7 @@ public class TSTTest {
 		tree.put("artist", "1");
 		tree.put("artup", "1");
 		tree.put("arbitrary", "1");
+		tree.put("strap", "data");
 
 		return tree;
 	}
