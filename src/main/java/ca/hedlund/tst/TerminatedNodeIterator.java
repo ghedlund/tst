@@ -36,6 +36,8 @@ public class TerminatedNodeIterator<V> implements Iterator<TernaryTreeNode<V>> {
 
 	private TernaryTreeNode<V> currentNode;
 
+	private Branch currentBranch = Branch.Left;
+
 	private TernaryTreeNode<V> nextNode;
 
 	private Predicate<TernaryTreeNode<V>> filter;
@@ -75,6 +77,7 @@ public class TerminatedNodeIterator<V> implements Iterator<TernaryTreeNode<V>> {
 		this.currentBranch = Branch.Left;
 	}
 
+	/* Recursive method
 	private TernaryTreeNode<V> findNextNode() {
 		if(currentNode == null) {
 			return continueFromNode(this.startNode, Branch.Left);
@@ -122,8 +125,8 @@ public class TerminatedNodeIterator<V> implements Iterator<TernaryTreeNode<V>> {
 		} else
 			return null;
 	}
+	*/
 
-	private Branch currentBranch = Branch.Left;
 	private TernaryTreeNode<V> nextNode() {
 		TernaryTreeNode<V> node = this.currentNode != null ? this.currentNode : this.startNode;
 		Branch branch = this.currentBranch;
@@ -173,7 +176,7 @@ public class TerminatedNodeIterator<V> implements Iterator<TernaryTreeNode<V>> {
 	@Override
 	public TernaryTreeNode<V> next() {
 		if(this.nextNode == null)
-			this.nextNode = findNextNode();
+			this.nextNode = nextNode();
 		this.currentNode = this.nextNode;
 		this.nextNode = null;
 		return this.currentNode;
