@@ -1,7 +1,7 @@
 package ca.hedlund.tst;
 
 import java.util.Iterator;
-import java.util.function.Function;
+import java.util.function.*;
 
 /**
  * Iterate terminated tree nodes with optional filter
@@ -38,13 +38,13 @@ public class TerminatedNodeIterator<V> implements Iterator<TernaryTreeNode<V>> {
 
 	private TernaryTreeNode<V> nextNode;
 
-	private Function<TernaryTreeNode<V>, Boolean> filter;
+	private Predicate<TernaryTreeNode<V>> filter;
 
 	public TerminatedNodeIterator(TernaryTree<V> tree) {
 		this(tree, (node) -> true);
 	}
 
-	public TerminatedNodeIterator(TernaryTree<V> tree, Function<TernaryTreeNode<V>, Boolean> filter) {
+	public TerminatedNodeIterator(TernaryTree<V> tree, Predicate<TernaryTreeNode<V>> filter) {
 		this(tree, tree.getRoot(), filter);
 	}
 
@@ -52,7 +52,7 @@ public class TerminatedNodeIterator<V> implements Iterator<TernaryTreeNode<V>> {
 		this(tree, node, (n) -> true);
 	}
 
-	public TerminatedNodeIterator(TernaryTree<V> tree, TernaryTreeNode<V> node, Function<TernaryTreeNode<V>, Boolean> filter) {
+	public TerminatedNodeIterator(TernaryTree<V> tree, TernaryTreeNode<V> node, Predicate<TernaryTreeNode<V>> filter) {
 		super();
 		this.tree = tree;
 		this.startNode = node;
@@ -90,7 +90,7 @@ public class TerminatedNodeIterator<V> implements Iterator<TernaryTreeNode<V>> {
 					TernaryTreeNode<V> leftVal = continueFromNode(node.getLeft(), Branch.Left);
 					return leftVal;
 				}
-				if(node.isTerminated() && filter.apply(node))
+				if(node.isTerminated() && filter.test(node))
 					return node;
 
 			case Center:
@@ -112,7 +112,7 @@ public class TerminatedNodeIterator<V> implements Iterator<TernaryTreeNode<V>> {
 
 		if(node.getParent() != null) {
 			final Branch childBranch = getBranch(node.getParent(), node);
-			if(childBranch == Branch.Left && node.getParent().isTerminated()) {
+			if(childBranch == Branch.Left && node.getParent().isTerminated() && filter.test(node.getParent())) {
 				return node.getParent();
 			}
 			return continueFromNode(node.getParent(), getBranch(node.getParent(), node).nextBranch());
