@@ -83,13 +83,25 @@ public class TerminatedNodeIterator<V> implements Iterator<TernaryTreeNode<V>> {
 		return null;
 	}
 
+	public TernaryTreeNode<V> getStartNode() {
+		return this.startNode;
+	}
+
 	public void setStartNode(TernaryTreeNode<V> startNode) {
 		this.startNode = startNode;
+	}
+
+	public TernaryTreeNode<V> getCurrentNode() {
+		return this.currentNode;
 	}
 
 	public void setCurrentNode(TernaryTreeNode<V> currentNode) {
 		this.currentNode = currentNode;
 		this.currentBranch = Branch.Center;
+	}
+
+	public boolean isPrefixSearch() {
+		return this.prefixSearch;
 	}
 
 	public void setPrefixSearch(boolean prefixSearch) {
