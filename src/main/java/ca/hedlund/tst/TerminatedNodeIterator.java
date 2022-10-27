@@ -34,6 +34,8 @@ public class TerminatedNodeIterator<V> implements Iterator<TernaryTreeNode<V>> {
 
 	private TernaryTreeNode<V> startNode;
 
+	private boolean prefixSearch = false;
+
 	private TernaryTreeNode<V> currentNode;
 
 	private Branch currentBranch = Branch.Left;
@@ -47,18 +49,28 @@ public class TerminatedNodeIterator<V> implements Iterator<TernaryTreeNode<V>> {
 	}
 
 	public TerminatedNodeIterator(TernaryTree<V> tree, Predicate<TernaryTreeNode<V>> filter) {
-		this(tree, tree.getRoot(), filter);
+		this(tree, tree.getRoot(), filter, false);
 	}
 
 	public TerminatedNodeIterator(TernaryTree<V> tree, TernaryTreeNode<V> node) {
-		this(tree, node, (n) -> true);
+		this(tree, node, (n) -> true, false);
 	}
 
-	public TerminatedNodeIterator(TernaryTree<V> tree, TernaryTreeNode<V> node, Predicate<TernaryTreeNode<V>> filter) {
+	/**
+	 *
+	 * @param tree
+	 * @param node
+	 * @param filter
+	 * @param prefixSearch if true will search for values where this node is the prefix
+	 */
+	public TerminatedNodeIterator(TernaryTree<V> tree, TernaryTreeNode<V> node, Predicate<TernaryTreeNode<V>> filter, boolean prefixSearch) {
 		super();
 		this.tree = tree;
 		this.startNode = node;
 		this.filter = filter;
+		this.prefixSearch = prefixSearch;
+		if(prefixSearch)
+			this.currentBranch = Branch.Center;
 	}
 
 	private Branch getBranch(TernaryTreeNode<V> parent, TernaryTreeNode<V> child) {
@@ -71,66 +83,25 @@ public class TerminatedNodeIterator<V> implements Iterator<TernaryTreeNode<V>> {
 		return null;
 	}
 
+	public void setStartNode(TernaryTreeNode<V> startNode) {
+		this.startNode = startNode;
+	}
+
+	public void setPrefixSearch(boolean prefixSearch) {
+		this.prefixSearch = prefixSearch;
+	}
+
 	public void reset() {
 		this.currentNode = null;
 		this.nextNode = null;
-		this.currentBranch = Branch.Left;
+		this.currentBranch = (this.prefixSearch ? Branch.Center : Branch.Left);
 	}
-
-	/* Recursive method
-	private TernaryTreeNode<V> findNextNode() {
-		if(currentNode == null) {
-			return continueFromNode(this.startNode, Branch.Left);
-		} else {
-			return continueFromNode(currentNode, Branch.Center);
-		}
-	}
-
-	private TernaryTreeNode<V> continueFromNode(TernaryTreeNode<V> node, Branch branch) {
-		// continue from next branch in parent node
-		switch(branch) {
-			case Left:
-				if(node.getLeft() != null) {
-					TernaryTreeNode<V> leftVal = continueFromNode(node.getLeft(), Branch.Left);
-					if(leftVal != null)
-						return leftVal;
-				}
-				if(node.isTerminated() && filter.test(node))
-					return node;
-
-			case Center:
-				if(node.getCenter() != null) {
-					TernaryTreeNode<V> centerVal = continueFromNode(node.getCenter(), Branch.Left);
-					if(centerVal != null)
-						return centerVal;
-				}
-
-			case Right:
-				if(node.getRight() != null) {
-					TernaryTreeNode<V> rightVal = continueFromNode(node.getRight(), Branch.Left);
-					if(rightVal != null)
-						return rightVal;
-				}
-
-			default:
-				break;
-		}
-
-		if(node.getParent() != null) {
-			final Branch childBranch = getBranch(node.getParent(), node);
-			if(childBranch == Branch.Left && node.getParent().isTerminated() && filter.test(node.getParent())) {
-				return node.getParent();
-			}
-			return continueFromNode(node.getParent(), childBranch.nextBranch());
-		} else
-			return null;
-	}
-	*/
 
 	private TernaryTreeNode<V> nextNode() {
 		TernaryTreeNode<V> node = this.currentNode != null ? this.currentNode : this.startNode;
 		Branch branch = this.currentBranch;
 
+		boolean loopCnd = true;
 		do {
 			switch(branch) {
 				case Left:
@@ -163,7 +134,14 @@ public class TerminatedNodeIterator<V> implements Iterator<TernaryTreeNode<V>> {
 			}
 			node = node.getParent();
 			branch = childBranch.nextBranch();
-		} while(!(node == tree.getRoot() && branch == Branch.Undefined));
+
+			if(this.prefixSearch) {
+				loopCnd = !(node == this.startNode && branch == Branch.Right);
+			} else {
+				loopCnd = !(node == tree.getRoot() && branch == Branch.Undefined);
+			}
+		} while(loopCnd);
+
 		return null;
 	}
 

@@ -33,8 +33,10 @@ public class TSTTest {
 
 		tree.put("", "empty");
 		tree.put("stick", "world");
-		tree.put("bat", "1");
-		tree.put("batter", "1");
+		tree.put("bet", "1");
+		tree.put("better", "1");
+		tree.put("bazar", "test");
+		tree.put("butter", "bread");
 		tree.put("art", "1");
 		tree.put("orb", "1");
 		tree.put("artist", "1");
@@ -59,6 +61,24 @@ public class TSTTest {
 			++cnt;
 		}
 		Assert.assertEquals(tree.size(), cnt);
+	}
+
+	@Test
+	public void testPrefixNodeIterator() {
+		final TernaryTree<String> tree = createTestTree();
+
+		final Optional<TernaryTreeNode<String>> prefixNode = tree.findNode("be");
+		Assert.assertTrue(prefixNode.isPresent());
+		int cnt = 0;
+
+		System.out.println(tree.keysWithPrefix("be"));
+
+		final TerminatedNodeIterator<String> itr = new TerminatedNodeIterator<>(tree, prefixNode.get(), (t) -> true, true);
+		while(itr.hasNext()) {
+			System.out.println(itr.next().getPrefix());
+			++cnt;
+		}
+		Assert.assertEquals(2, cnt);
 	}
 
 	@Test
