@@ -71,14 +71,28 @@ public class TSTTest {
 		Assert.assertTrue(prefixNode.isPresent());
 		int cnt = 0;
 
-		System.out.println(tree.keysWithPrefix("be"));
-
 		final TerminatedNodeIterator<String> itr = new TerminatedNodeIterator<>(tree, prefixNode.get(), (t) -> true, true);
 		while(itr.hasNext()) {
 			System.out.println(itr.next().getPrefix());
 			++cnt;
 		}
 		Assert.assertEquals(2, cnt);
+	}
+
+	@Test
+	public void testContinueFromNodeIterator() {
+		final TernaryTree<String> tree = createTestTree();
+
+		final Optional<TernaryTreeNode<String>> prefixNode = tree.findNode("be");
+		Assert.assertTrue(prefixNode.isPresent());
+		int cnt = 0;
+
+		final TerminatedNodeIterator<String> itr = new TerminatedNodeIterator<>(tree, prefixNode.get(), (t) -> true, false);
+		while(itr.hasNext()) {
+			System.out.println(itr.next().getPrefix());
+			++cnt;
+		}
+		Assert.assertEquals(7, cnt);
 	}
 
 	@Test
