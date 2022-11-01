@@ -33,6 +33,7 @@ public class TSTTest {
 
 		tree.put("", "empty");
 		tree.put("stick", "world");
+		tree.put("be", "1");
 		tree.put("bet", "1");
 		tree.put("better", "1");
 		tree.put("bazar", "test");
@@ -76,7 +77,7 @@ public class TSTTest {
 			System.out.println(itr.next().getPrefix());
 			++cnt;
 		}
-		Assert.assertEquals(2, cnt);
+		Assert.assertEquals(3, cnt);
 	}
 
 	@Test
@@ -103,6 +104,13 @@ public class TSTTest {
 		while(itr.hasNext()) {
 			System.out.println(itr.next().getPrefix());
 		}
+	}
+
+	@Test
+	public void testEmptyNodeIterator() {
+		final TernaryTree<String> tree = new TernaryTree<>();
+		final TerminatedNodeIterator<String> itr = new TerminatedNodeIterator<>(tree);
+		Assert.assertFalse(itr.hasNext());
 	}
 
 	@Test
