@@ -138,6 +138,9 @@ public class TerminatedNodeIterator<V> implements Iterator<TernaryTreeNode<V>> {
 					}
 
 				case Right:
+					if(this.prefixSearch && node == this.startNode) {
+						return null;
+					}
 					if(node.getRight() != null) {
 						branch = Branch.Left;
 						node = node.getRight();
