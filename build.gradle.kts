@@ -4,7 +4,7 @@ plugins {
 }
 
 group = "ca.hedlund"
-version = "26"
+version = "27"
 
 java {
     toolchain {
