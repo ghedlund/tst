@@ -21,11 +21,9 @@ import java.nio.ByteBuffer;
 import java.util.Map.Entry;
 import java.util.Optional;
 
-import org.junit.*;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
 
-@RunWith(JUnit4.class)
 public class TSTTest {
 
 	public TernaryTree<String> createTestTree() {
@@ -53,15 +51,15 @@ public class TSTTest {
 		final TernaryTree<String> tree = createTestTree();
 
 		final TerminatedNodeIterator<String> itr = new TerminatedNodeIterator<>(tree);
-		Assert.assertTrue(itr.hasNext());
-		Assert.assertEquals("empty", itr.next().getValue());
+		assertTrue(itr.hasNext());
+		assertEquals("empty", itr.next().getValue());
 		itr.reset();
 		int cnt = 0;
 		while(itr.hasNext()) {
 			System.out.println(itr.next().getPrefix());
 			++cnt;
 		}
-		Assert.assertEquals(tree.size(), cnt);
+		assertEquals(tree.size(), cnt);
 	}
 
 	@Test
@@ -69,7 +67,7 @@ public class TSTTest {
 		final TernaryTree<String> tree = createTestTree();
 
 		final Optional<TernaryTreeNode<String>> prefixNode = tree.findNode("be");
-		Assert.assertTrue(prefixNode.isPresent());
+		assertTrue(prefixNode.isPresent());
 		int cnt = 0;
 
 		TerminatedNodeIterator<String> itr = new TerminatedNodeIterator<>(tree, prefixNode.get(), (t) -> true, true);
@@ -77,17 +75,17 @@ public class TSTTest {
 			System.out.println(itr.next().getPrefix());
 			++cnt;
 		}
-		Assert.assertEquals(3, cnt);
+		assertEquals(3, cnt);
 
 		final Optional<TernaryTreeNode<String>> prefixNode1 = tree.findNode("better");
-		Assert.assertTrue(prefixNode1.isPresent());
+		assertTrue(prefixNode1.isPresent());
 		cnt = 0;
 		itr = new TerminatedNodeIterator<>(tree, prefixNode1.get(), (t) -> true, true);
 		while(itr.hasNext()) {
 			System.out.println(itr.next().getPrefix());
 			++cnt;
 		}
-		Assert.assertEquals(1, cnt);
+		assertEquals(1, cnt);
 	}
 
 	@Test
@@ -95,7 +93,7 @@ public class TSTTest {
 		final TernaryTree<String> tree = createTestTree();
 
 		final Optional<TernaryTreeNode<String>> prefixNode = tree.findNode("be");
-		Assert.assertTrue(prefixNode.isPresent());
+		assertTrue(prefixNode.isPresent());
 		int cnt = 0;
 
 		final TerminatedNodeIterator<String> itr = new TerminatedNodeIterator<>(tree, prefixNode.get(), (t) -> true, false);
@@ -103,7 +101,7 @@ public class TSTTest {
 			System.out.println(itr.next().getPrefix());
 			++cnt;
 		}
-		Assert.assertEquals(7, cnt);
+		assertEquals(7, cnt);
 	}
 
 	@Test
@@ -120,7 +118,7 @@ public class TSTTest {
 	public void testEmptyNodeIterator() {
 		final TernaryTree<String> tree = new TernaryTree<>();
 		final TerminatedNodeIterator<String> itr = new TerminatedNodeIterator<>(tree);
-		Assert.assertFalse(itr.hasNext());
+		assertFalse(itr.hasNext());
 	}
 
 	@Test
@@ -129,11 +127,11 @@ public class TSTTest {
 
 		for(Entry<String, String> entry:tree.entrySet()) {
 			Optional<TernaryTreeNode<String>> node = tree.findNode(entry.getKey());
-			Assert.assertTrue(node.isPresent());
+			assertTrue(node.isPresent());
 			TernaryTreeNodePath path = node.get().getPath();
 			Optional<TernaryTreeNode<String>> followPath = path.followPath(tree.getRoot());
-			Assert.assertTrue(followPath.isPresent());
-			Assert.assertEquals(node.get(), followPath.get());
+			assertTrue(followPath.isPresent());
+			assertEquals(node.get(), followPath.get());
 		}
 	}
 
@@ -157,17 +155,17 @@ public class TSTTest {
 
 		for(Entry<String, String> entry:tree.entrySet()) {
 			Optional<TernaryTreeNode<String>> node = tree.findNode(entry.getKey());
-			Assert.assertTrue(node.isPresent());
-			Assert.assertTrue(node.get().isTerminated());
+			assertTrue(node.isPresent());
+			assertTrue(node.get().isTerminated());
 			TernaryTreeNodePath nodePath = node.get().getPath();
 
 			Optional<TernaryTreeNode<String>> node2 = tree2.findNode(entry.getKey());
-			Assert.assertTrue(node2.isPresent());
-			Assert.assertTrue(node2.get().isTerminated());
-			Assert.assertEquals(entry.getValue(), node2.get().getValue());
+			assertTrue(node2.isPresent());
+			assertTrue(node2.get().isTerminated());
+			assertEquals(entry.getValue(), node2.get().getValue());
 			TernaryTreeNodePath node2Path = node2.get().getPath();
 
-			Assert.assertArrayEquals(nodePath.toByteArray(), node2Path.toByteArray());
+			assertArrayEquals(nodePath.toByteArray(), node2Path.toByteArray());
 		}
 	}
 
